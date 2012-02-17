@@ -13,8 +13,8 @@ import java.util.Set;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.xml.sax.SAXException;
 
+import com.jamierf.rssfeeder.ParserException;
 import com.jamierf.rssfeeder.parsers.RSSParser;
 import com.jamierf.rssfeeder.parsers.torrent.BitMeParser;
 import com.jamierf.rssfeeder.parsers.torrent.BitMeTVParser;
@@ -97,7 +97,7 @@ public class Config {
 				}
 			}
 		}
-		catch (MalformedURLException | SAXException e) {
+		catch (MalformedURLException | ParserException e) {
 			throw new ConfigurationException("Error adding feed parser", e);
 		}
 	}
