@@ -5,6 +5,12 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.configuration.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +34,32 @@ public class MediaManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(MediaManager.class);
 
-	public static void main(String[] args) throws SAXException, IOException, ConfigurationException {
-		final Config config = new Config(new File("config.ini"));
+	private static final String DEFAULT_CONFIG_FILE = "config.ini";
+
+	private static final Options options = new Options();
+
+	static {
+		options.addOption("h", false, "Print this help message");
+		options.addOption("c", true, "Path to configuration file");
+	}
+
+	public static void main(String[] args) throws SAXException, IOException, ConfigurationException, ParseException {
+		final CommandLineParser parser = new GnuParser();
+		final CommandLine params = parser.parse(options, args);
+
+		if (params.hasOption("h")) {
+			final HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("MediaManager", options);
+			return;
+		}
+
+		final File configFile;
+		if (params.hasOption("c"))
+			configFile = new File(params.getOptionValue("c"));
+		else
+			configFile = new File(DEFAULT_CONFIG_FILE);
+
+		final Config config = new Config(configFile);
 		final MediaManager manager = new MediaManager(config);
 		manager.start();
 	}
