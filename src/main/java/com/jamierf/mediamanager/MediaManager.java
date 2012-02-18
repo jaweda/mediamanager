@@ -2,6 +2,8 @@ package com.jamierf.mediamanager;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.slf4j.Logger;
@@ -12,7 +14,9 @@ import com.jamierf.epdirscanner.EpDirScanner;
 import com.jamierf.epdirscanner.Episode;
 import com.jamierf.epdirscanner.Episode.State;
 import com.jamierf.epdirscanner.FilenameParser;
+import com.jamierf.epdirscanner.Season;
 import com.jamierf.epdirscanner.Series;
+import com.jamierf.epguidesparser.EpisodeInfo;
 import com.jamierf.mediamanager.downloader.Downloader;
 import com.jamierf.mediamanager.downloader.WatchDirDownloader;
 import com.jamierf.rssfeeder.FeedListener;
@@ -66,6 +70,23 @@ public class MediaManager {
 			}
 		});
 		feeder.start(config.getRssUpdateDelay());
+	}
+
+	public Collection<EpisodeInfo> getMissingEpisodes() {
+		final Collection<EpisodeInfo> missing = new LinkedList<EpisodeInfo>();
+
+		for (Series series : epScanner.getSeries()) {
+			for (Season season : series.getSeasons()) {
+				for (Episode episode : season.getEpisodes()) {
+					if (episode.getFile() != null)
+						continue;
+
+					missing.add(episode.getInfo());
+				}
+			}
+		}
+
+		return missing;
 	}
 
 	private void processRSSItem(RSSItem item) {
