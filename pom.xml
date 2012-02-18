@@ -1,29 +1,54 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.jamierf</groupId>
-  <artifactId>mediamanager</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <dependencies>
-	<dependency>
-		<groupId>commons-configuration</groupId>
-		<artifactId>commons-configuration</artifactId>
-		<version>1.7</version>
-	</dependency>
-  	<dependency>
-  		<groupId>com.jamierf</groupId>
-  		<artifactId>rssfeeder</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>com.jamierf</groupId>
-  		<artifactId>epdirscanner</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>junit</groupId>
-  		<artifactId>junit</artifactId>
-  		<version>4.8.2</version>
-  		<scope>test</scope>
-  	</dependency>
-  </dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.jamierf</groupId>
+	<artifactId>mediamanager</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<url>https://github.com/reines/mediamanager</url>
+
+	<issueManagement>
+		<url>https://github.com/reines/mediamanager/issues</url>
+		<system>GitHub Issues</system>
+	</issueManagement>
+
+	<scm>
+		<url>https://github.com/reines/mediamanager</url>
+		<connection>scm:git:git://github.com/reines/mediamanager.git</connection>
+		<developerConnection>scm:git:git@github.com:reines/mediamanager.git</developerConnection>
+	</scm>
+
+	<distributionManagement>
+		<repository>
+			<id>jamierf-release</id>
+			<url>http://robin.jamierf.co.uk:8081/nexus/content/repositories/releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>jamierf-snapshot</id>
+			<url>http://robin.jamierf.co.uk:8081/nexus/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>commons-configuration</groupId>
+			<artifactId>commons-configuration</artifactId>
+			<version>1.7</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jamierf</groupId>
+			<artifactId>rssfeeder</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jamierf</groupId>
+			<artifactId>epdirscanner</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.2</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>
