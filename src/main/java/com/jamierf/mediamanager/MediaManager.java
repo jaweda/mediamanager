@@ -46,7 +46,7 @@ public class MediaManager {
 			feeder.addParser(parser);
 
 		directoryRoot = config.getDirectoryRoot();
-		epScanner = new EpDirScanner(directoryRoot, config.getSeriesMapping());
+		epScanner = new EpDirScanner(directoryRoot, config.getSeriesMapping(), config.getCacheDir(), config.getCacheTTL());
 		torrentDownloader = new WatchDirDownloader(config.getTorrentWatchDir());
 	}
 

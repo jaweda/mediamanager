@@ -24,6 +24,7 @@ import com.jamierf.rssfeeder.parsers.torrent.SCCParser;
 public class Config {
 
 	public static final int DEFAULT_RSS_UPDATE_DELAY = 15;
+	public static final int DEFAULT_CACHE_TTL = 24;
 
 	private static String getRequiredString(Configuration config, String key) throws ConfigurationException {
 		if (!config.containsKey(key))
@@ -45,6 +46,8 @@ public class Config {
 	private File torrentWatchDir;
 	private final Map<String, String> seriesMapping;
 	private final Collection<RSSParser> feedParsers;
+	private final File cacheDir;
+	private final int cacheTTL;
 
 	@SuppressWarnings("unchecked")
 	public Config(File file) throws ConfigurationException {
@@ -57,7 +60,7 @@ public class Config {
 		if (!directoryRoot.isDirectory())
 			throw new ConfigurationException("Directory root is not a directory");
 
-		rssUpdateDelay = DEFAULT_RSS_UPDATE_DELAY;
+		rssUpdateDelay = config.getInt("rssupdatedelay", DEFAULT_RSS_UPDATE_DELAY);
 
 		desiredQualities = new HashSet<String>();
 		if (config.containsKey("qualities"))
@@ -100,6 +103,16 @@ public class Config {
 		catch (MalformedURLException | ParserException e) {
 			throw new ConfigurationException("Error adding feed parser", e);
 		}
+
+		if (config.containsKey("cachedir")) {
+			cacheDir = new File(config.getString("cachedir"));
+			if (!cacheDir.isDirectory())
+				throw new ConfigurationException("Cache directory is not a directory");
+		}
+		else
+			cacheDir = null;
+
+		cacheTTL = config.getInt("cachettl", DEFAULT_CACHE_TTL);
 	}
 
 	public File getDirectoryRoot() {
@@ -124,5 +137,13 @@ public class Config {
 
 	public Collection<RSSParser> getFeedParsers() {
 		return feedParsers;
+	}
+
+	public File getCacheDir() {
+		return cacheDir;
+	}
+
+	public int getCacheTTL() {
+		return cacheTTL;
 	}
 }
