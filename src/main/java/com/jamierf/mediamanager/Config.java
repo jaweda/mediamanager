@@ -44,6 +44,7 @@ public class Config {
 	private int rssUpdateDelay;
 	private final Set<String> desiredQualities;
 	private File torrentWatchDir;
+	private File torrentDownloadDir;
 	private final Map<String, String> seriesMapping;
 	private final Collection<RSSParser> feedParsers;
 	private final File cacheDir;
@@ -69,6 +70,10 @@ public class Config {
 		torrentWatchDir = new File(Config.getRequiredString(config, "watchdir"));
 		if (!torrentWatchDir.isDirectory())
 			throw new ConfigurationException("Torrent watch directory is not a directory");
+
+		torrentDownloadDir = new File(Config.getRequiredString(config, "downloaddir"));
+		if (!torrentDownloadDir.isDirectory())
+			throw new ConfigurationException("Torrent download directory is not a directory");
 
 		seriesMapping = new HashMap<String, String>();
 		// TODO: load mapping
@@ -129,6 +134,10 @@ public class Config {
 
 	public File getTorrentWatchDir() {
 		return torrentWatchDir;
+	}
+
+	public File getTorrentDownloadDir() {
+		return torrentDownloadDir;
 	}
 
 	public Map<String, String> getSeriesMapping() {

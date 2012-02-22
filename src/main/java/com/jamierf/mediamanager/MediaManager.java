@@ -25,6 +25,8 @@ import com.jamierf.epdirscanner.Series;
 import com.jamierf.epguidesparser.EpisodeInfo;
 import com.jamierf.mediamanager.downloader.Downloader;
 import com.jamierf.mediamanager.downloader.WatchDirDownloader;
+import com.jamierf.mediamanager.handler.MediaFileHandler;
+import com.jamierf.mediamanager.handler.RarFileHandler;
 import com.jamierf.rssfeeder.FeedListener;
 import com.jamierf.rssfeeder.Feeder;
 import com.jamierf.rssfeeder.RSSItem;
@@ -69,6 +71,7 @@ public class MediaManager {
 	private final Feeder feeder;
 	private final EpDirScanner epScanner;
 	private final Downloader torrentDownloader;
+	private final DLManager downloadManager;
 
 	public MediaManager(Config config) throws SAXException, IOException {
 		this.config = config;
@@ -82,10 +85,18 @@ public class MediaManager {
 		directoryRoot = config.getDirectoryRoot();
 		epScanner = new EpDirScanner(directoryRoot, config.getSeriesMapping(), config.getCacheDir(), config.getCacheTTL());
 		torrentDownloader = new WatchDirDownloader(config.getTorrentWatchDir());
+
+		downloadManager = new DLManager(config.getTorrentDownloadDir());
+
+		final EpisodeNamer namer = new EpisodeNamer(directoryRoot, epScanner);
+
+		downloadManager.addFileTypeHandler(new RarFileHandler(namer));
+		downloadManager.addFileTypeHandler(new MediaFileHandler(namer));
 	}
 
 	public void start() {
 		epScanner.start();
+		downloadManager.start();
 
 		feeder.addListener(new FeedListener() {
 			@Override
