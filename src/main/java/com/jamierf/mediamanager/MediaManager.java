@@ -90,8 +90,8 @@ public class MediaManager {
 
 		final EpisodeNamer namer = new EpisodeNamer(directoryRoot, epScanner);
 
-		downloadManager.addFileTypeHandler(new RarFileHandler(namer));
-		downloadManager.addFileTypeHandler(new MediaFileHandler(namer));
+		downloadManager.addFileTypeHandler(new RarFileHandler(namer, config.isOverwriteFiles()));
+		downloadManager.addFileTypeHandler(new MediaFileHandler(namer, config.isMoveFiles(), config.isOverwriteFiles()));
 	}
 
 	public void start() {

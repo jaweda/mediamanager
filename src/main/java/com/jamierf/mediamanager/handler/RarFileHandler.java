@@ -24,9 +24,11 @@ public class RarFileHandler implements FileTypeHandler {
 	private static final Logger logger = LoggerFactory.getLogger(RarFileHandler.class);
 
 	private final EpisodeNamer namer;
+	private final boolean overwrite;
 
-	public RarFileHandler(EpisodeNamer namer) {
+	public RarFileHandler(EpisodeNamer namer, boolean overwrite) {
 		this.namer = namer;
+		this.overwrite = overwrite;
 	}
 
 	@Override
@@ -50,7 +52,7 @@ public class RarFileHandler implements FileTypeHandler {
 				}
 
 				final File destFile = namer.getEpisodeFile(fileHeader.getFileNameString(), parts.getTitle(), parts.getSeason(), parts.getEpisode());
-				if (destFile.exists())
+				if (!overwrite && destFile.exists())
 					return;
 
 				if (logger.isTraceEnabled())

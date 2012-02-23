@@ -25,6 +25,8 @@ public class Config {
 
 	public static final int DEFAULT_RSS_UPDATE_DELAY = 15;
 	public static final int DEFAULT_CACHE_TTL = 24;
+	private static final boolean DEFAULT_MOVE_FILES = false;
+	private static final boolean DEFAULT_OVERWRITE_FILES = false;
 
 	private static String getRequiredString(Configuration config, String key) throws ConfigurationException {
 		if (!config.containsKey(key))
@@ -49,6 +51,8 @@ public class Config {
 	private final Collection<RSSParser> feedParsers;
 	private final File cacheDir;
 	private final int cacheTTL;
+	private final boolean moveFiles;
+	private final boolean overwriteFiles;
 
 	@SuppressWarnings("unchecked")
 	public Config(File file) throws ConfigurationException {
@@ -118,6 +122,9 @@ public class Config {
 			cacheDir = null;
 
 		cacheTTL = config.getInt("cachettl", DEFAULT_CACHE_TTL);
+
+		moveFiles = config.getBoolean("movefiles", DEFAULT_MOVE_FILES);
+		overwriteFiles = config.getBoolean("overwritefiles", DEFAULT_OVERWRITE_FILES);
 	}
 
 	public File getDirectoryRoot() {
@@ -154,5 +161,13 @@ public class Config {
 
 	public int getCacheTTL() {
 		return cacheTTL;
+	}
+
+	public boolean isMoveFiles() {
+		return moveFiles;
+	}
+
+	public boolean isOverwriteFiles() {
+		return overwriteFiles;
 	}
 }

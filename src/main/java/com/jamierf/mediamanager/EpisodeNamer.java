@@ -15,6 +15,7 @@ import com.jamierf.epguidesparser.SeriesNotFoundException;
 public class EpisodeNamer {
 
 	private static final Pattern FILE_EXT_REGEX = Pattern.compile("\\.([^\\.]+)$");
+	private static final Pattern FILENAME_REMOVAL_REGEX = Pattern.compile("[\\|\\\\\\?\\*<\":>\\+\\[\\]/!]");
 
 	public static String getFileExtension(String name) {
 		final Matcher matcher = FILE_EXT_REGEX.matcher(name);
@@ -22,6 +23,10 @@ public class EpisodeNamer {
 			return null;
 
 		return matcher.group(1).toLowerCase();
+	}
+
+	public static String cleanFilenamePart(String filename) {
+		return FILENAME_REMOVAL_REGEX.matcher(filename).replaceAll("");
 	}
 
 	private final File mediaDir;
@@ -39,10 +44,10 @@ public class EpisodeNamer {
 				throw new IOException(new EpisodeNotFoundException("No such episode"));
 
 			return new File(mediaDir, String.format("%s/Season %s/%s - %s.%s",
-				info.getSeries(), // TODO: replace invalid chars
+				EpisodeNamer.cleanFilenamePart(info.getSeries()),
 				StringUtils.leftPad(String.valueOf(info.getSeason()), 2, '0'),
 				StringUtils.leftPad(String.valueOf(info.getEpisode()), 2, '0'),
-				info.getTitle(), // TODO: replace invalid chars
+				EpisodeNamer.cleanFilenamePart(info.getTitle()),
 				EpisodeNamer.getFileExtension(originalName)
 			));
 		}

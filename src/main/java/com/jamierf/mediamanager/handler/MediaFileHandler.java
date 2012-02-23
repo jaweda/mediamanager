@@ -18,9 +18,13 @@ public class MediaFileHandler implements FileTypeHandler {
 	private static final Logger logger = LoggerFactory.getLogger(MediaFileHandler.class);
 
 	private final EpisodeNamer namer;
+	private final boolean move;
+	private final boolean overwrite;
 
-	public MediaFileHandler(EpisodeNamer namer) {
+	public MediaFileHandler(EpisodeNamer namer, boolean move, boolean overwrite) {
 		this.namer = namer;
+		this.move = move;
+		this.overwrite = overwrite;
 	}
 
 	@Override
@@ -39,7 +43,7 @@ public class MediaFileHandler implements FileTypeHandler {
 		}
 
 		final File destFile = namer.getEpisodeFile(file.getName(), parts.getTitle(), parts.getSeason(), parts.getEpisode());
-		if (destFile.exists())
+		if (!overwrite && destFile.exists())
 			return;
 
 		if (logger.isTraceEnabled())
@@ -50,6 +54,9 @@ public class MediaFileHandler implements FileTypeHandler {
 		if (!destDir.exists())
 			destDir.mkdirs();
 
-		FileUtils.copyFile(file, destFile);
+		if (move)
+			FileUtils.moveFile(file, destFile);
+		else
+			FileUtils.copyFile(file, destFile);
 	}
 }
