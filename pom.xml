@@ -78,7 +78,7 @@
 		<dependency>
 			<groupId>com.jamierf</groupId>
 			<artifactId>epdirscanner</artifactId>
-			<version>1.5</version>
+			<version>1.6</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
