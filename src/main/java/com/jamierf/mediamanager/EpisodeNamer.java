@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
 
 import com.jamierf.epdirscanner.EpDirScanner;
+import com.jamierf.epdirscanner.Episode;
 import com.jamierf.epdirscanner.EpisodeNotFoundException;
 import com.jamierf.epguidesparser.EpisodeInfo;
 import com.jamierf.epguidesparser.SeriesNotFoundException;
@@ -39,9 +40,11 @@ public class EpisodeNamer {
 
 	public File getEpisodeFile(String originalName, String title, int season, int episode) throws IOException {
 		try {
-			final EpisodeInfo info = episodes.getOrCreateSeries(title).getEpisode(season, episode).getInfo();
-			if (info == null)
+			final Episode ep = episodes.getOrCreateSeries(title).getEpisode(season, episode);
+			if (ep == null)
 				throw new IOException(new EpisodeNotFoundException("No such episode"));
+
+			final EpisodeInfo info = ep.getInfo();
 
 			return new File(mediaDir, String.format("%s/Season %s/%s - %s.%s",
 				EpisodeNamer.cleanFilenamePart(info.getSeries()),
