@@ -6,5 +6,5 @@ import java.io.IOException;
 public interface FileTypeHandler {
 
 	public String[] getHandledExtensions();
-	public void handleFile(File file) throws IOException;
+	public void handleFile(String relativePath, File file) throws IOException;
 }

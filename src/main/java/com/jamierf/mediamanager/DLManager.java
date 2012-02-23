@@ -17,6 +17,7 @@ public class DLManager {
 
 	private final DirMonitor monitor;
 	private final Map<String, FileTypeHandler> fileHandlers;
+	private final int pathTrimLength;
 
 	public DLManager(File downloadDir) throws IOException {
 		monitor = new DirMonitor(downloadDir);
@@ -29,6 +30,7 @@ public class DLManager {
 		});
 
 		fileHandlers = new HashMap<String, FileTypeHandler>();
+		pathTrimLength = downloadDir.getAbsolutePath().length();
 	}
 
 	public void addFileTypeHandler(FileTypeHandler handler) {
@@ -46,7 +48,9 @@ public class DLManager {
 	}
 
 	private void processFile(File file) {
-		final String extension = EpisodeNamer.getFileExtension(file.getName());
+		final String path = file.getAbsolutePath().substring(pathTrimLength).replaceAll("\\\\", "/"); // trim the start then fix windows style slashes
+
+		final String extension = EpisodeNamer.getFileExtension(path);
 		if (extension == null) {
 			if (logger.isDebugEnabled())
 				logger.debug("Skipping file with no extension");
@@ -63,7 +67,7 @@ public class DLManager {
 		}
 
 		try {
-			handler.handleFile(file);
+			handler.handleFile(path, file);
 		}
 		catch (IOException e) {
 			if (logger.isWarnEnabled())

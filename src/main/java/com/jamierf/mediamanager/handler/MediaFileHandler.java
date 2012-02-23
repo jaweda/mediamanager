@@ -33,8 +33,8 @@ public class MediaFileHandler implements FileTypeHandler {
 	}
 
 	@Override
-	public void handleFile(File file) throws IOException {
-		final FilenameParser.Parts parts = FilenameParser.parse(file.getName());
+	public void handleFile(String relativePath, File file) throws IOException {
+		final FilenameParser.Parts parts = FilenameParser.parse(relativePath);
 		if (parts == null) {
 			if (logger.isDebugEnabled())
 				logger.debug("Skipping unparsable media file: " + file.getName());

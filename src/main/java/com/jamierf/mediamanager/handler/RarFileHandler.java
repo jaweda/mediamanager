@@ -37,7 +37,7 @@ public class RarFileHandler implements FileTypeHandler {
 	}
 
 	@Override
-	public void handleFile(File file) throws IOException {
+	public void handleFile(String relativePath, File file) throws IOException {
 		try {
 			final Archive archive = new Archive(file);
 
