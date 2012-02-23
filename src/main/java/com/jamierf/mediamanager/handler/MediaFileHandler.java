@@ -46,17 +46,22 @@ public class MediaFileHandler implements FileTypeHandler {
 		if (!overwrite && destFile.exists())
 			return;
 
-		if (logger.isTraceEnabled())
-			logger.trace("Copying {} to {}", parts, destFile.getAbsoluteFile());
-
 		// Make the parent directory if required
 		final File destDir = destFile.getParentFile();
 		if (!destDir.exists())
 			destDir.mkdirs();
 
-		if (move)
+		if (move) {
+			if (logger.isTraceEnabled())
+				logger.trace("Moving {} to {}", parts, destFile.getAbsoluteFile());
+
 			FileUtils.moveFile(file, destFile);
-		else
+		}
+		else {
+			if (logger.isTraceEnabled())
+				logger.trace("Copying {} to {}", parts, destFile.getAbsoluteFile());
+
 			FileUtils.copyFile(file, destFile);
+		}
 	}
 }
