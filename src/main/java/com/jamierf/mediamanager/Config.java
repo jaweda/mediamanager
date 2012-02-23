@@ -80,7 +80,8 @@ public class Config {
 			throw new ConfigurationException("Torrent download directory is not a directory");
 
 		seriesMapping = new HashMap<String, String>();
-		// TODO: load mapping
+
+		seriesMapping.put("housemd", "house"); // TODO: load mapping
 
 		feedParsers = new LinkedList<RSSParser>();
 		try {
