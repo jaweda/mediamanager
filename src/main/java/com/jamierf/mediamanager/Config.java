@@ -88,6 +88,10 @@ public class Config {
 		seriesMapping.put("bb", "breakingbad");
 		seriesMapping.put("ff", "firefly");
 		seriesMapping.put("twire", "wire");
+		seriesMapping.put("sga", "stargateatlantis");
+		seriesMapping.put("topgearuk2002", "topgear");
+		seriesMapping.put("jericho2006", "jericho");
+		seriesMapping.put("howimet", "howimetyourmother");
 
 		feedParsers = new LinkedList<RSSParser>();
 		try {
