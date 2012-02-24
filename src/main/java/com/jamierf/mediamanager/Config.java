@@ -82,6 +82,12 @@ public class Config {
 		seriesMapping = new HashMap<String, String>();
 
 		seriesMapping.put("housemd", "house"); // TODO: load mapping
+		seriesMapping.put("spartacusbloodandsand", "spartacus");
+		seriesMapping.put("blegal", "bostonlegal");
+		seriesMapping.put("pb", "prisonbreak");
+		seriesMapping.put("bb", "breakingbad");
+		seriesMapping.put("ff", "firefly");
+		seriesMapping.put("twire", "wire");
 
 		feedParsers = new LinkedList<RSSParser>();
 		try {
