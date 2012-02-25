@@ -27,6 +27,7 @@ public class Config {
 	public static final int DEFAULT_CACHE_TTL = 24;
 	private static final boolean DEFAULT_MOVE_FILES = false;
 	private static final boolean DEFAULT_OVERWRITE_FILES = false;
+	private static final int DEFAULT_HTTP_PORT = 8990;
 
 	private static String getRequiredString(Configuration config, String key) throws ConfigurationException {
 		if (!config.containsKey(key))
@@ -53,6 +54,7 @@ public class Config {
 	private final int cacheTTL;
 	private final boolean moveFiles;
 	private final boolean overwriteFiles;
+	private final int httpPort;
 
 	@SuppressWarnings("unchecked")
 	public Config(File file) throws ConfigurationException {
@@ -136,6 +138,8 @@ public class Config {
 
 		moveFiles = config.getBoolean("movefiles", DEFAULT_MOVE_FILES);
 		overwriteFiles = config.getBoolean("overwritefiles", DEFAULT_OVERWRITE_FILES);
+
+		httpPort = config.getInt("httpport", DEFAULT_HTTP_PORT);
 	}
 
 	public File getDirectoryRoot() {
@@ -180,5 +184,9 @@ public class Config {
 
 	public boolean isOverwriteFiles() {
 		return overwriteFiles;
+	}
+
+	public int getHttpPort() {
+		return httpPort;
 	}
 }

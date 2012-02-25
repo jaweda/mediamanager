@@ -1,0 +1,37 @@
+@border-width:2px;
+@background-color:white;
+@border-color:black;
+
+* {
+	margin:0;
+	padding:0;
+}
+
+html, body {
+	width:100%;
+	height:100%;
+}
+
+body {
+	background-color:@background-color;
+	overflow:hidden;
+}
+
+#leftbox {
+	height:100%;
+	border:0px solid @border-color;
+	overflow-x:hidden;
+	overflow-y:auto;
+
+	width:250px;
+	border-right-width:@border-width;
+	float:left;
+}
+
+.jqueryFileTree .media_hd { background: url(icons/media_hd.png) left top no-repeat; }
+.jqueryFileTree .media_sd { background: url(icons/media_sd.png) left top no-repeat; }
+.jqueryFileTree .missing { background: url(icons/media_missing.png) left top no-repeat; }
+
+.jqueryFileTree .missing a {
+	color:red;
+}
