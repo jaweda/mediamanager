@@ -28,8 +28,13 @@ public class MediaTreeHandler implements HttpHandler {
 	private static String episodeToMediaClass(Episode episode, Date now) {
 		final EpisodeInfo info = episode.getInfo();
 		final LocalEpisode local = episode.getFile();
-		if (local == null)
-			return info.getDate().after(now) ? "unaired" : "missing";
+		if (local == null) {
+			final Date airDate = info.getDate();
+			if (airDate == null || airDate.after(now))
+				return "unaired";
+
+			return "missing";
+		}
 
 		switch (local.getFileExt()) {
 			case "mkv": {
