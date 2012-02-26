@@ -1,5 +1,7 @@
 package com.jamierf.mediamanager.web;
 
+import java.util.Date;
+
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.webbitserver.HttpControl;
@@ -23,10 +25,20 @@ public class MediaTreeHandler implements HttpHandler {
 		return path.substring(1).split("/");
 	}
 
-	private static String extToMediaClass(String ext) {
-		switch (ext) {
-			case "mkv": return "media_hd";
-			default: return "media_sd";
+	private static String episodeToMediaClass(Episode episode, Date now) {
+		final EpisodeInfo info = episode.getInfo();
+		final LocalEpisode local = episode.getFile();
+		if (local == null)
+			return info.getDate().after(now) ? "unaired" : "missing";
+
+		switch (local.getFileExt()) {
+			case "mkv": {
+				return "media_hd";
+			}
+
+			default: {
+				return "media_sd";
+			}
 		}
 	}
 
@@ -37,13 +49,11 @@ public class MediaTreeHandler implements HttpHandler {
 		return String.format("<li class=\"directory collapsed\"><a href=\"#\" rel=\"%1$s\" title=\" %2$s \">%2$s</a></li>", path, title);
 	}
 
-	private static String createFileHtml(String path, String title, String ext) {
-		final String fileclass = ext == null ? "missing" : MediaTreeHandler.extToMediaClass(ext);
-
+	private static String createFileHtml(String path, String title, String fileClass) {
 		path = StringEscapeUtils.escapeHtml(path);
 		title = StringEscapeUtils.escapeHtml(title);
 
-		return String.format("<li class=\"%1$s\"><a href=\"#\" rel=\"%2$s\" title=\" %3$s \">%3$s</a></li>", fileclass, path, title);
+		return String.format("<li class=\"%1$s\"><a href=\"#\" rel=\"%2$s\" title=\" %3$s \">%3$s</a></li>", fileClass, path, title);
 	}
 
 	private final EpDirScanner epScanner;
@@ -55,6 +65,7 @@ public class MediaTreeHandler implements HttpHandler {
 	@Override
 	public void handleHttpRequest(HttpRequest req, HttpResponse resp, HttpControl ctrl) throws Exception {
 		final String[] parts = MediaTreeHandler.splitPath(req.postParam("dir"));
+		final Date now = new Date();
 
 		final StringBuilder content = new StringBuilder();
 
@@ -96,13 +107,12 @@ public class MediaTreeHandler implements HttpHandler {
 
 				for (Episode episode : season.getEpisodes()) {
 					final EpisodeInfo info = episode.getInfo();
-					final LocalEpisode local = episode.getFile();
 
 					final String path = String.format("/%s/%d/%s", series.getKey(), season.getSeason(), info.getTitle());
 					final String title = String.format("%s %s", StringUtils.leftPad(String.valueOf(info.getEpisode()), 2, '0'), info.getTitle());
-					final String ext = local == null ? null : local.getFileExt();
+					final String fileClass = MediaTreeHandler.episodeToMediaClass(episode, now);
 
-					content.append(MediaTreeHandler.createFileHtml(path, title, ext));
+					content.append(MediaTreeHandler.createFileHtml(path, title, fileClass));
 				}
 			}
 		}

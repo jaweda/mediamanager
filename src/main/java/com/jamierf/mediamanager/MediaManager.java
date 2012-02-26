@@ -28,6 +28,7 @@ import com.jamierf.mediamanager.downloader.WatchDirDownloader;
 import com.jamierf.mediamanager.handler.MediaFileHandler;
 import com.jamierf.mediamanager.handler.RarFileHandler;
 import com.jamierf.mediamanager.web.WebUI;
+import com.jamierf.mediamanager.web.messages.LogMessage;
 import com.jamierf.rssfeeder.FeedListener;
 import com.jamierf.rssfeeder.Feeder;
 import com.jamierf.rssfeeder.RSSItem;
@@ -99,8 +100,13 @@ public class MediaManager {
 	}
 
 	public void start() {
+		web.sendLog("Starting", LogMessage.Type.DEBUG);
+
 		epScanner.start();
+		web.sendLog("Completed initial media directory scan", LogMessage.Type.DEBUG);
+
 		downloadManager.start();
+		web.sendLog("Completed initial download directory scan", LogMessage.Type.DEBUG);
 
 		feeder.addListener(new FeedListener() {
 			@Override
@@ -181,6 +187,8 @@ public class MediaManager {
 
 		if (logger.isDebugEnabled())
 			logger.debug("Downloading torrent: {} s{}e{} ({})", new Object[]{ parts.getTitle(), parts.getSeason(), parts.getEpisode(), parts.getQuality() });
+
+		web.sendLog("Downloading: " + item.getTitle(), LogMessage.Type.DOWNLOAD);
 
 		try {
 			// Download the torrent file

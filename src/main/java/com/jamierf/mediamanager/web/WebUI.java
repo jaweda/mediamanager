@@ -9,12 +9,14 @@ import org.webbitserver.WebServers;
 import org.webbitserver.handler.EmbeddedResourceHandler;
 
 import com.jamierf.epdirscanner.EpDirScanner;
+import com.jamierf.mediamanager.web.messages.LogMessage;
 
 public class WebUI {
 
 	private static final Logger logger = LoggerFactory.getLogger(WebUI.class);
 
 	private final WebServer server;
+	private final DataWebSocketHandler websocketHandler;
 
 	public WebUI(int port, EpDirScanner epScanner) throws IOException {
 		server = WebServers.createWebServer(port);
@@ -27,6 +29,13 @@ public class WebUI {
 
 		server.add("/filetree.html", new MediaTreeHandler(epScanner));
 
+		websocketHandler = new DataWebSocketHandler();
+		server.add("/socket", websocketHandler);
+
 		server.start();
+	}
+
+	public void sendLog(String message, LogMessage.Type type) {
+		websocketHandler.send(new LogMessage(message, type));
 	}
 }

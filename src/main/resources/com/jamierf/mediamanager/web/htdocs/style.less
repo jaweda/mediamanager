@@ -1,10 +1,11 @@
 @border-width:2px;
 @background-color:white;
 @border-color:black;
+@padding:5px;
 
 * {
-	margin:0;
-	padding:0;
+	margin:0px;
+	padding:0px;
 }
 
 html, body {
@@ -17,21 +18,91 @@ body {
 	overflow:hidden;
 }
 
-#leftbox {
+#leftbox, #mainbox {
 	height:100%;
-	border:0px solid @border-color;
 	overflow-x:hidden;
 	overflow-y:auto;
+}
 
-	width:250px;
-	border-right-width:@border-width;
+#leftbox {
+	width:230px;
+	border-right:@border-width solid @border-color;
 	float:left;
 }
 
-.jqueryFileTree .media_hd { background: url(icons/media_hd.png) left top no-repeat; }
-.jqueryFileTree .media_sd { background: url(icons/media_sd.png) left top no-repeat; }
-.jqueryFileTree .missing { background: url(icons/media_missing.png) left top no-repeat; }
+#content {
+	padding:@padding;
+}
 
-.jqueryFileTree .missing a {
-	color:red;
+#log {
+	height:120px;
+	border-bottom:@border-width solid @border-color;
+	padding:@padding;
+	overflow-y:scroll;
+	font-size:0.9em;
+}
+
+#log p.connection { color:#cc0000; }
+#log p.debug { color:#888888; }
+#log p.download { color:#00cc00; }
+
+#log p span.date {
+	color:#888888;
+	font-size:0.9em;
+}
+
+#log p span.date:before {
+	content:"[";
+}
+
+#log p span.date:after {
+	content:"] ";
+}
+
+/* jqueryFileTree */
+
+ul.jqueryFileTree {
+	font-family:Verdana, sans-serif;
+	font-size:11px;
+	line-height:18px;
+	padding:0px;
+	margin:0px;
+}
+
+ul.jqueryFileTree li {
+	list-style:none;
+	padding-left:20px;
+	white-space:nowrap;
+}
+
+ul.jqueryFileTree a {
+	color:#333333;
+	text-decoration:none;
+	display:block;
+	padding:0px 2px;
+}
+
+ul.jqueryFileTree a:hover {
+	background:#bbddff;
+}
+
+ul.jqueryFileTree li.directory { background: url('icons/folder_closed.png') left top no-repeat; }
+ul.jqueryFileTree li.expanded { background: url('icons/folder_open.png') left top no-repeat; }
+ul.jqueryFileTree li.wait { background: url('icons/spinner.gif') left top no-repeat; }
+
+ul.jqueryFileTree li.media_hd { background: url('icons/media_hd.png') left top no-repeat; }
+ul.jqueryFileTree li.media_sd { background: url('icons/media_sd.png') left top no-repeat; }
+ul.jqueryFileTree li.missing { background: url('icons/media_missing.png') left top no-repeat; }
+ul.jqueryFileTree li.unaired { background: url('icons/media_missing.png') left top no-repeat; }
+
+ul.jqueryFileTree li.media_hd, ul.jqueryFileTree li.media_sd {
+	color:#000000;
+}
+
+ul.jqueryFileTree li.missing a {
+	color:#cc0000;
+}
+
+ul.jqueryFileTree li.unaired a {
+	color:#aaaaaa;
 }
