@@ -16,7 +16,7 @@ import com.jamierf.epguidesparser.SeriesNotFoundException;
 public class EpisodeNamer {
 
 	private static final Pattern FILE_EXT_REGEX = Pattern.compile("\\.([^\\.]+)$");
-	private static final Pattern FILENAME_REMOVAL_REGEX = Pattern.compile("[\\|\\\\\\?\\*<'\":>\\+\\[\\]/!]");
+	private static final Pattern FILENAME_REMOVAL_REGEX = Pattern.compile("[\\|\\\\\\?\\*<'\":>\\+\\[\\]/!,]");
 
 	public static String getFileExtension(String name) {
 		final Matcher matcher = FILE_EXT_REGEX.matcher(name);
