@@ -69,7 +69,7 @@ public class DLManager {
 		try {
 			handler.handleFile(path, file);
 		}
-		catch (IOException e) {
+		catch (Exception e) {
 			if (logger.isWarnEnabled())
 				logger.warn("Error handling file", e);
 		}
