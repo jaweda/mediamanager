@@ -58,7 +58,7 @@ public class RarFileHandler implements FileTypeHandler {
 					continue;
 
 				if (logger.isTraceEnabled())
-					logger.trace("Extracting {} to {}", parts, destFile.getAbsoluteFile());
+					logger.trace("Extracting {} to {}", fileHeader.getFileNameString(), destFile.getAbsoluteFile());
 
 				// Make the parent directory if required
 				final File destDir = destFile.getParentFile();

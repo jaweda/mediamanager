@@ -49,13 +49,13 @@ public class MediaFileHandler implements FileTypeHandler {
 
 		if (move) {
 			if (logger.isTraceEnabled())
-				logger.trace("Moving {} to {}", parts, destFile.getAbsoluteFile());
+				logger.trace("Moving {} to {}", relativePath, destFile.getAbsoluteFile());
 
 			FileUtils.moveFile(file, destFile);
 		}
 		else {
 			if (logger.isTraceEnabled())
-				logger.trace("Copying {} to {}", parts, destFile.getAbsoluteFile());
+				logger.trace("Copying {} to {}", relativePath, destFile.getAbsoluteFile());
 
 			FileUtils.copyFile(file, destFile);
 		}
