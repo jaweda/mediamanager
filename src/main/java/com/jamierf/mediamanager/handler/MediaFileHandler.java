@@ -35,16 +35,12 @@ public class MediaFileHandler implements FileTypeHandler {
 	@Override
 	public void handleFile(String relativePath, File file) throws IOException {
 		final FilenameParser.Parts parts = FilenameParser.parse(relativePath);
-		if (parts == null) {
-			if (logger.isDebugEnabled())
-				logger.debug("Skipping unparsable media file: " + file.getName());
-
-			return;
-		}
+		if (parts == null)
+			throw new IOException("Skipping unparsable media file: " + file.getName());
 
 		final File destFile = namer.getEpisodeFile(file.getName(), parts.getTitle(), parts.getSeason(), parts.getEpisode());
 		if (!overwrite && destFile.exists())
-			return;
+			throw new IOException("Skipping already existing media file: " + file.getName());
 
 		// Make the parent directory if required
 		final File destDir = destFile.getParentFile();

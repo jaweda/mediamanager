@@ -41,6 +41,8 @@ public class RarFileHandler implements FileTypeHandler {
 		try {
 			final Archive archive = new Archive(file);
 
+			boolean handled = false;
+
 			final List<FileHeader> fileHeaders = archive.getFileHeaders();
 			for (FileHeader fileHeader : fileHeaders) {
 				final FilenameParser.Parts parts = FilenameParser.parse(fileHeader.getFileNameString());
@@ -53,7 +55,7 @@ public class RarFileHandler implements FileTypeHandler {
 
 				final File destFile = namer.getEpisodeFile(fileHeader.getFileNameString(), parts.getTitle(), parts.getSeason(), parts.getEpisode());
 				if (!overwrite && destFile.exists())
-					return;
+					continue;
 
 				if (logger.isTraceEnabled())
 					logger.trace("Extracting {} to {}", parts, destFile.getAbsoluteFile());
@@ -67,11 +69,15 @@ public class RarFileHandler implements FileTypeHandler {
 
 				try {
 					archive.extractFile(fileHeader, out);
+					handled = true;
 				}
 				finally {
 					out.close();
 				}
 			}
+
+			if (!handled)
+				throw new IOException("Skipping rar file with no handlable contents: " + file.getName());
 		}
 		catch (RarException e) {
 			throw new IOException(e);
