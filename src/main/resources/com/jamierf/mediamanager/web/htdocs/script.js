@@ -124,6 +124,7 @@ function createMediaTree(options) {
 			var src = $(ui.draggable);
 			var dest = $(this);
 
+			console.log(src);
 			console.log(dest);
 			// TODO
 		},

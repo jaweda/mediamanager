@@ -84,6 +84,7 @@ public class Config {
 		seriesMapping = new HashMap<String, String>();
 
 		seriesMapping.put("housemd", "house"); // TODO: load mapping
+		seriesMapping.put("parenthood", "parenthood_2009");
 		seriesMapping.put("spartacusbloodandsand", "spartacus");
 		seriesMapping.put("blegal", "bostonlegal");
 		seriesMapping.put("pb", "prisonbreak");
