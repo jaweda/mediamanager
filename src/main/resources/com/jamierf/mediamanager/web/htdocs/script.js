@@ -127,6 +127,8 @@ function createMediaTree(options) {
 	});
 }
 
+var websocket_uri = 'ws://' + window.location.host + ':8990/socket';
+
 // Array holding information for all of our episodes
 var library = [];
 
@@ -185,7 +187,7 @@ $(document).ready( function() {
 		})
 	});
 
-	var ws = new WebSocket('ws://' + window.location.host + '/socket');
+	var ws = new WebSocket(websocket_uri);
 	ws.onopen = function() {
 		log('Connection opened', 'connection');
 	}
