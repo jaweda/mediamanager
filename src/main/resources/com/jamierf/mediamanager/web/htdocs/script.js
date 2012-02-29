@@ -14,11 +14,11 @@ function createDraggableTreeItem(title, type) {
 	return item;
 }
 
-function createSeriesTree(seasons, options) {
+function createSeriesTree(seasons, options, now) {
 	var list = $('<ul></ul>');
 
 	$.each(seasons, function(key, value) {
-		var tree = createSeasonTree(value.episodes, options);
+		var tree = createSeasonTree(value.episodes, options, now);
 		if (tree.children().size() == 0)
 			return;
 
@@ -29,11 +29,11 @@ function createSeriesTree(seasons, options) {
 	return list.hide();
 }
 
-function createSeasonTree(episodes, options) {
+function createSeasonTree(episodes, options, now) {
 	var list = $('<ul></ul>');
 
 	$.each(episodes, function(key, value) {
-		var state = getEpisodeState(value);
+		var state = getEpisodeState(value, now);
 
 		if (!options.showSD && state === 'media_sd') return;
 		if (!options.showHD && state === 'media_hd') return;
@@ -48,9 +48,10 @@ function createSeasonTree(episodes, options) {
 	return list.hide();
 }
 
-function getEpisodeState(episode) {
+function getEpisodeState(episode, now) {
 	if (typeof episode.file === 'undefined') {
-		// TODO: Unaired
+		if (typeof epsiode.info.date !== 'undefined' && Date.parse(episode.info.date) > now)
+			return 'unaired';
 
 		return 'missing';
 	}
@@ -91,6 +92,8 @@ function log(msg, type) {
 function createMediaTree(options) {
 	var list = $('#leftbox > ul.filetree').empty();
 
+	var now = new Date().getTime();
+
 	if (typeof options === 'undefined')
 		options = {};
 
@@ -101,7 +104,7 @@ function createMediaTree(options) {
 	if (typeof options.showUnaired === 'undefined') options.showUnaired = true;
 
 	$.each(library, function(key, value) {
-		var tree = createSeriesTree(value.seasons, options);
+		var tree = createSeriesTree(value.seasons, options, now);
 		if (tree.children().size() == 0)
 			return;
 
@@ -127,7 +130,7 @@ function createMediaTree(options) {
 	});
 }
 
-var websocket_uri = 'ws://' + window.location.host + ':8990/socket';
+var websocket_uri = 'ws://' + window.location.hostname + ':8990/socket';
 
 // Array holding information for all of our episodes
 var library = [];
