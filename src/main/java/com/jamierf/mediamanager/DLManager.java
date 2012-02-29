@@ -2,7 +2,9 @@ package com.jamierf.mediamanager;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -17,6 +19,7 @@ public class DLManager {
 
 	private final DirMonitor monitor;
 	private final Map<String, FileTypeHandler> fileHandlers;
+	private final Collection<String> extras;
 	private final int pathTrimLength;
 
 	public DLManager(File downloadDir) throws IOException {
@@ -30,6 +33,7 @@ public class DLManager {
 		});
 
 		fileHandlers = new HashMap<String, FileTypeHandler>();
+		extras = new LinkedList<String>();
 		pathTrimLength = downloadDir.getAbsolutePath().length();
 	}
 
@@ -37,6 +41,10 @@ public class DLManager {
 		final String[] exts = handler.getHandledExtensions();
 		for (String ext : exts)
 			fileHandlers.put(ext.toLowerCase(), handler);
+	}
+
+	public Collection<String> getExtras() {
+		return extras;
 	}
 
 	public void start() {
@@ -55,6 +63,7 @@ public class DLManager {
 			if (logger.isDebugEnabled())
 				logger.debug("Skipping file with no extension");
 
+			extras.add(path);
 			return;
 		}
 
@@ -63,6 +72,7 @@ public class DLManager {
 			if (logger.isTraceEnabled())
 				logger.trace("Unhandled file type: " + extension);
 
+			extras.add(path);
 			return;
 		}
 
@@ -72,6 +82,8 @@ public class DLManager {
 		catch (Exception e) {
 			if (logger.isWarnEnabled())
 				logger.warn("Error handling file", e);
+
+			extras.add(path);
 		}
 	}
 }

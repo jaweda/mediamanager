@@ -25,7 +25,7 @@ body {
 }
 
 #leftbox {
-	width:230px;
+	width:300px;
 	border-right:@border-width solid @border-color;
 	float:left;
 }
@@ -59,9 +59,36 @@ body {
 	content:"] ";
 }
 
-/* jqueryFileTree */
+#extramedia, #extradls {
+  padding:@padding;
+  width:300px;
+  overflow:hidden;
+}
 
-ul.jqueryFileTree {
+#extramedia > h2, #extradls > h2 {
+  text-align:center;
+}
+
+#extramedia > ul, #extradls > ul {
+  border:@border-width solid @border-color;
+}
+
+#buttons {
+  width:100px;
+  padding:@padding;
+}
+
+#buttons li {
+  list-style-type:none;
+}
+
+#buttons li input {
+  margin-right:10px;
+}
+
+/* filetree */
+
+ul.filetree {
 	font-family:Verdana, sans-serif;
 	font-size:11px;
 	line-height:18px;
@@ -69,40 +96,36 @@ ul.jqueryFileTree {
 	margin:0px;
 }
 
-ul.jqueryFileTree li {
+ul.filetree li {
 	list-style:none;
 	padding-left:20px;
 	white-space:nowrap;
 }
 
-ul.jqueryFileTree a {
+ul.filetree a {
 	color:#333333;
 	text-decoration:none;
 	display:block;
 	padding:0px 2px;
 }
 
-ul.jqueryFileTree a:hover {
-	background:#bbddff;
-}
+ul.filetree li.directory { background: url('icons/folder_closed.png') left top no-repeat; }
+ul.filetree li.expanded { background: url('icons/folder_open.png') left top no-repeat; }
 
-ul.jqueryFileTree li.directory { background: url('icons/folder_closed.png') left top no-repeat; }
-ul.jqueryFileTree li.expanded { background: url('icons/folder_open.png') left top no-repeat; }
-ul.jqueryFileTree li.wait { background: url('icons/spinner.gif') left top no-repeat; }
+ul.filetree li.media_hd { background: url('icons/media_hd.png') left top no-repeat; }
+ul.filetree li.media_sd { background: url('icons/media_sd.png') left top no-repeat; }
+ul.filetree li.missing { background: url('icons/media_missing.png') left top no-repeat; }
+ul.filetree li.unaired { background: url('icons/media_unaired.png') left top no-repeat; }
+ul.filetree li.unknown { background: url('icons/file.png') left top no-repeat; }
 
-ul.jqueryFileTree li.media_hd { background: url('icons/media_hd.png') left top no-repeat; }
-ul.jqueryFileTree li.media_sd { background: url('icons/media_sd.png') left top no-repeat; }
-ul.jqueryFileTree li.missing { background: url('icons/media_missing.png') left top no-repeat; }
-ul.jqueryFileTree li.unaired { background: url('icons/media_unaired.png') left top no-repeat; }
-
-ul.jqueryFileTree li.media_hd, ul.jqueryFileTree li.media_sd {
+ul.filetree li.media_hd a, ul.filetree li.media_sd a, ul.filetree li.unknown a {
 	color:#000000;
 }
 
-ul.jqueryFileTree li.missing a {
+ul.filetree li.missing a {
 	color:#cc0000;
 }
 
-ul.jqueryFileTree li.unaired a {
+ul.filetree li.unaired a {
 	color:#aaaaaa;
 }

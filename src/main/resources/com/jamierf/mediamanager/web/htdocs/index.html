@@ -3,32 +3,50 @@
 	<head>
 		<title>MediaManager</title>
 		<link rel="icon" type="image/png" href="icon.png" />
+
+		<link rel="stylesheet" type="text/css" href="lib/normalize.css" />
 		<link rel="stylesheet/less" type="text/css" href="style.less" />
-		
+
 		<script type="text/javascript" src="lib/less-1.2.1.min.js"></script>
+
 		<script type="text/javascript" src="lib/dateformat-1.2.3.js"></script>
-		
-		<script type="text/javascript" src="lib/jquery-1.2.6.min.js"></script>
-		<script type="text/javascript" src="lib/jquery.filetree-1.1.js"></script>
-		
+
+		<script type="text/javascript" src="lib/jquery-1.7.1.min.js"></script>
+		<script type="text/javascript" src="lib/jquery-ui-1.8.16.min.js"></script>
+
 		<script type="text/javascript" src="script.js"></script>
 	</head>
 	<body>
 		<div id="leftbox">
-		
+			<ul class="filetree"></ul>
 		</div>
 		<div id="mainbox">
 			<pre id="log"></pre>
+			<ul id="buttons">
+				<li><input type="checkbox" id="showSD" name="showSD" checked="checked" /><label for="showSD">SD</label></li>
+				<li><input type="checkbox" id="showHD" name="showHD" checked="checked" /><label for="showHD">HD</label></li>
+				<li><input type="checkbox" id="showUnknown" name="showUnknown" checked="checked" /><label for="showUnknown">Unknown</label></li>
+				<li><input type="checkbox" id="showMissing" name="showMissing" checked="checked" /><label for="showMissing">Missing</label></li>
+				<li><input type="checkbox" id="showUnaired" name="showUnaired" checked="checked" /><label for="showUnaired">Unaired</label></li>
+			</ul>
+
+			<h2>TODO</h2>
 			<ul id="content">
 				<li>Add more logging inside app</li>
-				<li>Filter episode tree: got (sd/hd/all), missing, unaired, all</li>
 				<li>Update tree as new episodes are found</li>
-				<li>List of extra files</li>
 				<li>Settings: general config, series mappings, list of torrent feeds</li>
-				<li>Unaired episode icon</li>
 				<li>js licensing?</li>
 			</ul>
+			
+			<div id="extramedia">
+				<h2>Extra Media Files</h2>
+				<ul class="filetree"></ul>
+			</div>
+			
+			<div id="extradls">
+				<h2>Extra Downloaded Files</h2>
+				<ul class="filetree"></ul>
+			</div>
 		</div>
 	</body>
 </html>
-

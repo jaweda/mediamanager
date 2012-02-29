@@ -96,7 +96,7 @@ public class MediaManager {
 		downloadManager.addFileTypeHandler(new RarFileHandler(namer, config.isOverwriteFiles()));
 		downloadManager.addFileTypeHandler(new MediaFileHandler(namer, config.isMoveFiles(), config.isOverwriteFiles()));
 
-		web = new WebUI(config.getHttpPort(), epScanner);
+		web = new WebUI(config.getHttpPort(), epScanner, downloadManager);
 	}
 
 	public void start() {
