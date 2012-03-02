@@ -109,23 +109,23 @@ ul.filetree a {
 	padding:0px 2px;
 }
 
-ul.filetree li.directory { background: url('icons/folder_closed.png') left top no-repeat; }
-ul.filetree li.expanded { background: url('icons/folder_open.png') left top no-repeat; }
+ul.filetree li.directory { background: url('icons/folder.png') left top no-repeat; }
+ul.filetree li.file { background: url('icons/file.png') left top no-repeat; }
 
-ul.filetree li.media_hd { background: url('icons/media_hd.png') left top no-repeat; }
-ul.filetree li.media_sd { background: url('icons/media_sd.png') left top no-repeat; }
-ul.filetree li.missing { background: url('icons/media_missing.png') left top no-repeat; }
-ul.filetree li.unaired { background: url('icons/media_unaired.png') left top no-repeat; }
-ul.filetree li.unknown { background: url('icons/file.png') left top no-repeat; }
+ul.filetree li.file[rel='media_hd'] { background: url('icons/media_hd.png') left top no-repeat; }
+ul.filetree li.file[rel='media_sd'] { background: url('icons/media_sd.png') left top no-repeat; }
+ul.filetree li.file[rel='missing'] { background: url('icons/media_missing.png') left top no-repeat; }
+ul.filetree li.file[rel='unaired'] { background: url('icons/media_unaired.png') left top no-repeat; }
+ul.filetree li.file[rel='unknown'] { background: url('icons/file.png') left top no-repeat; }
 
-ul.filetree li.media_hd a, ul.filetree li.media_sd a, ul.filetree li.unknown a {
+ul.filetree li.file[rel='media_hd'] a, ul.filetree li.file[rel='media_sd'] a, ul.filetree li.file[rel='unknown'] a {
 	color:#000000;
 }
 
-ul.filetree li.missing a {
+ul.filetree li.file[rel='missing'] a {
 	color:#cc0000;
 }
 
-ul.filetree li.unaired a {
+ul.filetree li.file[rel='unaired'] a {
 	color:#aaaaaa;
 }

@@ -14,36 +14,51 @@ function createDraggableTreeItem(title, type) {
 	return item;
 }
 
-function createSeriesTree(seasons, options, now) {
+function createSeriesTree(seasons, now) {
 	var list = $('<ul></ul>');
 
+	var seriesState = null;
+
 	$.each(seasons, function(key, value) {
-		var tree = createSeasonTree(value.episodes, options, now);
+		var tree = createSeasonTree(value.episodes, now);
 		if (tree.children().size() == 0)
 			return;
 
-		var item = createTreeItem('Season ' + value.season, 'directory').append(tree);
+		var state = tree.attr('rel');
+		tree.removeAttr('rel');
+
+		if (seriesState == null)
+			seriesState = state;
+		else if (seriesState != state)
+			seriesState = 'mixed';
+
+		var item = createTreeItem('Season ' + value.season, 'directory').attr('rel', state).append(tree);
 		list.append(item);
 	});
+
+	list.attr('rel', seriesState);
 
 	return list.hide();
 }
 
-function createSeasonTree(episodes, options, now) {
+function createSeasonTree(episodes, now) {
 	var list = $('<ul></ul>');
+
+	var seasonState = null;
 
 	$.each(episodes, function(key, value) {
 		var state = getEpisodeState(value, now);
 
-		if (!options.showSD && state === 'media_sd') return;
-		if (!options.showHD && state === 'media_hd') return;
-		if (!options.showUnknown && state === 'unknown') return;
-		if (!options.showMissing && state === 'missing') return;
-		if (!options.showUnaired && state === 'unaired') return;
+		if (seasonState == null)
+			seasonState = state;
+		else if (seasonState != state)
+			seasonState = 'mixed';
 
-		var item = createTreeItem(value.info.episode + ' ' + value.info.title, state);
+		var item = createTreeItem(value.info.episode + ' ' + value.info.title, 'file').attr('rel', state);
 		list.append(item);
 	});
+
+	list.attr('rel', seasonState);
 
 	return list.hide();
 }
@@ -89,26 +104,20 @@ function log(msg, type) {
 	$('#log').prepend($('<p></p>').addClass(type).append(time).append(msg));
 }
 
-function createMediaTree(options) {
+function createMediaTree() {
 	var list = $('#leftbox > ul.filetree').empty();
 
 	var now = new Date().getTime();
 
-	if (typeof options === 'undefined')
-		options = {};
-
-	if (typeof options.showSD === 'undefined') options.showSD = true;
-	if (typeof options.showHD === 'undefined') options.showHD = true;
-	if (typeof options.showUnknown === 'undefined') options.showUnknown = true;
-	if (typeof options.showMissing === 'undefined') options.showMissing = true;
-	if (typeof options.showUnaired === 'undefined') options.showUnaired = true;
-
 	$.each(library, function(key, value) {
-		var tree = createSeriesTree(value.seasons, options, now);
+		var tree = createSeriesTree(value.seasons, now);
 		if (tree.children().size() == 0)
 			return;
 
-		var item = createTreeItem(value.title, 'directory').append(tree);
+		var state = tree.attr('rel');
+		tree.removeAttr('rel');
+
+		var item = createTreeItem(value.title, 'directory').attr('rel', state).append(tree);
 		list.append(item);
 	});
 
@@ -131,35 +140,55 @@ function createMediaTree(options) {
 	});
 }
 
+function processTreeItem(item, options) {
+	var state = item.attr('rel');
+	var visibleChildren = 0;
+
+	// If it's mixed then process it's children individually
+	if (state == 'mixed') {
+		var children = item.children('ul').children('li');
+		children.each(function() {
+			visibleChildren += processTreeItem($(this), options);
+		});
+
+		// Make us visible if we have children, or hidden otherwise
+		item.toggle(visibleChildren > 0);
+	}
+	// Otherwise process this item
+	else {
+		var show = options[state] ? true : false;
+		item.toggle(show);
+	
+		if (show)
+			visibleChildren++;
+	}
+
+	return visibleChildren;
+}
+
 var websocket_uri = 'ws://' + window.location.hostname + ':8990/socket';
 
 // Array holding information for all of our episodes
 var library = [];
 
-// Options used when creating the media tree
-var options = {
-	showSD: true,
-	showHD: true,
-	showUnkown: true,
-	showMissing: true,
-	showUnaired: true,
-};
-
 $(document).ready( function() {
 	$.getJSON('library.json', function(d) {
 		library = d;
 
-		createMediaTree(options);
+		createMediaTree();
 
 		$('#buttons > li > input:checkbox').change(function() {
-			var key = $(this).attr('name');
+			var options = {
+				media_sd: $('#showSD').prop('checked'),
+				media_hd: $('#showHD').prop('checked'),
+				unknown: $('#showUnknown').prop('checked'),
+				missing: $('#showMissing').prop('checked'),
+				unaired: $('#showUnaired').prop('checked'),
+			};
 
-			if (typeof options[key] === 'undefined')
-				return;
-
-			options[key] = $(this).prop('checked');
-
-			createMediaTree(options);
+			$('#leftbox > ul.filetree > li').each(function() {
+				processTreeItem($(this), options);
+			});
 		});
 	});
 
