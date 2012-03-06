@@ -197,7 +197,7 @@ $(document).ready( function() {
 
 		$.each(d, function(key, value) {
 			var state = getFileState(value);
-			var item = createDraggableTreeItem(value.substring(1), state);
+			var item = createDraggableTreeItem(value.substring(1), 'file').attr('rel', state);
 			list.append(item);
 		});
 		
@@ -211,7 +211,7 @@ $(document).ready( function() {
 
 		$.each(d, function(key, value) {
 			var state = getFileState(value);
-			var item = createDraggableTreeItem(value.substring(1), state);
+			var item = createDraggableTreeItem(value.substring(1), 'file').attr('rel', state);
 			list.append(item);
 		});
 
