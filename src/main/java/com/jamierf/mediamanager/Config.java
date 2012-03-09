@@ -96,7 +96,7 @@ public class Config {
 		seriesMapping.put("jericho2006", "jericho");
 		seriesMapping.put("howimet", "howimetyourmother");
 		seriesMapping.put("davidattenboroughfrozenplanet", "frozenplanet");
-		seriesMapping.put("laf", "lifeafterpeople");
+		seriesMapping.put("lap", "lifeafterpeople");
 
 		feedParsers = new LinkedList<RSSParser>();
 		try {
