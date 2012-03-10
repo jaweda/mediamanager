@@ -65,7 +65,7 @@ function createSeasonTree(episodes, now) {
 
 function getEpisodeState(episode, now) {
 	if (typeof episode.file === 'undefined') {
-		if (typeof episode.info.date !== 'undefined' && Date.parse(episode.info.date) > now)
+		if (typeof episode.info.date === 'undefined' || Date.parse(episode.info.date) > now)
 			return 'unaired';
 
 		return 'missing';
