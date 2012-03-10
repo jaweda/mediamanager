@@ -1,6 +1,8 @@
 package com.jamierf.mediamanager;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,14 +22,26 @@ import com.jamierf.rssfeeder.parsers.torrent.BitMeParser;
 import com.jamierf.rssfeeder.parsers.torrent.BitMeTVParser;
 import com.jamierf.rssfeeder.parsers.torrent.HDBitsParser;
 import com.jamierf.rssfeeder.parsers.torrent.SCCParser;
+import com.thoughtworks.xstream.XStream;
 
 public class Config {
 
 	public static final int DEFAULT_RSS_UPDATE_DELAY = 15;
 	public static final int DEFAULT_CACHE_TTL = 24;
-	private static final boolean DEFAULT_MOVE_FILES = false;
-	private static final boolean DEFAULT_OVERWRITE_FILES = false;
-	private static final int DEFAULT_HTTP_PORT = 8990;
+	public static final boolean DEFAULT_MOVE_FILES = false;
+	public static final boolean DEFAULT_OVERWRITE_FILES = false;
+	public static final int DEFAULT_HTTP_PORT = 8990;
+
+	private static final XStream xstream;
+
+	static {
+		xstream = new XStream();
+
+		xstream.alias("seriesmapping", HashMap.class);
+		xstream.alias("series", Map.Entry.class);
+		xstream.alias("from", String.class);
+		xstream.alias("to", String.class);
+	}
 
 	private static String getRequiredString(Configuration config, String key) throws ConfigurationException {
 		if (!config.containsKey(key))
@@ -41,6 +55,16 @@ public class Config {
 			throw new ConfigurationException("Missing configuration option: " + key);
 
 		return config.getInt(key);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Map<String, String> loadSeriesMapping(File file) {
+		try {
+			return (Map<String, String>) xstream.fromXML(new FileInputStream(file));
+		}
+		catch (FileNotFoundException e) {
+			return new HashMap<String, String>();
+		}
 	}
 
 	private File directoryRoot;
@@ -81,22 +105,7 @@ public class Config {
 		if (!torrentDownloadDir.isDirectory())
 			throw new ConfigurationException("Torrent download directory is not a directory");
 
-		seriesMapping = new HashMap<String, String>();
-
-		seriesMapping.put("housemd", "house"); // TODO: load mapping
-		seriesMapping.put("parenthood", "parenthood_2009");
-		seriesMapping.put("spartacusbloodandsand", "spartacus");
-		seriesMapping.put("blegal", "bostonlegal");
-		seriesMapping.put("pb", "prisonbreak");
-		seriesMapping.put("bb", "breakingbad");
-		seriesMapping.put("ff", "firefly");
-		seriesMapping.put("twire", "wire");
-		seriesMapping.put("sga", "stargateatlantis");
-		seriesMapping.put("topgearuk2002", "topgear");
-		seriesMapping.put("jericho2006", "jericho");
-		seriesMapping.put("howimet", "howimetyourmother");
-		seriesMapping.put("davidattenboroughfrozenplanet", "frozenplanet");
-		seriesMapping.put("lap", "lifeafterpeople");
+		seriesMapping = Config.loadSeriesMapping(new File("seriesmapping.xml"));
 
 		feedParsers = new LinkedList<RSSParser>();
 		try {
