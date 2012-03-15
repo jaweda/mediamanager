@@ -55,4 +55,8 @@
 		<from>lap</from>
 		<to>lifeafterpeople</to>
 	</series>
+	<series>
+		<from>greys</from>
+		<to>greysanatomy</to>
+	</series>
 </seriesmapping>
