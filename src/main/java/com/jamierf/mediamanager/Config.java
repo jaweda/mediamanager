@@ -113,7 +113,8 @@ public class Config {
 			for (String feed : feeds) {
 				switch (feed.toLowerCase()) {
 					case "scc": {
-						feedParsers.add(new SCCParser(Config.getRequiredString(config, "feeds.scc.passkey")));
+						final String[] categories = config.getString("feeds.scc.categories").split(",");
+						feedParsers.add(new SCCParser(Config.getRequiredString(config, "feeds.scc.passkey"), categories));
 						break;
 					}
 					case "hdbits": {
