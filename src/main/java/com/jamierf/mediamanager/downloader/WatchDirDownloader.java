@@ -1,49 +1,57 @@
 package com.jamierf.mediamanager.downloader;
 
-import java.io.BufferedInputStream;
+import com.google.common.hash.Hashing;
+import com.yammer.dropwizard.client.HttpClientFactory;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.concurrent.TimeUnit;
-
 
 public class WatchDirDownloader implements Downloader {
 
-	private static final int CONNECTION_TIMEOUT = 10; // seconds
-
+    private final HttpClientFactory clientFactory;
 	private final File watchDir;
 
-	public WatchDirDownloader(File watchDir) {
-		this.watchDir = watchDir;
+	public WatchDirDownloader(HttpClientFactory clientFactory, File watchDir) {
+        this.clientFactory = clientFactory;
+        this.watchDir = watchDir;
+
+        if (!watchDir.exists())
+            watchDir.mkdirs();
 	}
+
+    @Override
+    public void start() throws Exception {
+
+    }
+
+    @Override
+    public void stop() throws Exception {
+
+    }
 
 	@Override
 	public void download(URL link) throws IOException {
-		final String filename = new File(link.getPath()).getName();
+        final String filename = String.format("%s.torrent", Hashing.sha1().hashString(link.toString()).toString());
+        final HttpClient client = clientFactory.build();
 
+        final HttpResponse response = client.execute(new HttpGet(link.toString()));
+
+        final InputStream in = response.getEntity().getContent();
 		final FileOutputStream out = new FileOutputStream(new File(watchDir, filename));
-		final BufferedInputStream in = new BufferedInputStream(this.openConnection(link).getInputStream());
 
-		try {
-			byte[] buffer = new byte[1024];
-			int size = 0;
-			while ((size = in.read(buffer)) > -1)
-				out.write(buffer, 0, size);
-
-		}
-		finally {
-			in.close();
-			out.close();
-		}
-	}
-
-	protected URLConnection openConnection(URL url) throws IOException {
-		final URLConnection conn = url.openConnection();
-
-		conn.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(CONNECTION_TIMEOUT));
-
-		return conn;
+        try {
+            IOUtils.copy(in, out);
+        }
+        finally {
+            in.close();
+            out.close();
+        }
 	}
 }

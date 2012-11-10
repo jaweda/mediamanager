@@ -1,83 +1,95 @@
 package com.jamierf.mediamanager.handler;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.jamierf.epdirscanner.FilenameParser;
-import com.jamierf.mediamanager.EpisodeNamer;
-import com.jamierf.mediamanager.FileTypeHandler;
-
+import com.google.common.collect.ImmutableSet;
+import com.yammer.dropwizard.logging.Log;
 import de.innosystec.unrar.Archive;
 import de.innosystec.unrar.exception.RarException;
 import de.innosystec.unrar.rarfile.FileHeader;
 
+import java.io.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.regex.Pattern;
+
 public class RarFileHandler implements FileTypeHandler {
 
-	private static final String[] EXTENSIONS = { "rar" };
+	public static final ImmutableSet<String> EXTENSIONS = ImmutableSet.of("rar");
 
-	private static final Logger logger = LoggerFactory.getLogger(RarFileHandler.class);
+    private static final Pattern PATH_NORMALISATION_REGEX = Pattern.compile("[\\\\/]");
 
-	private final EpisodeNamer namer;
-	private final boolean overwrite;
+	private static final Log LOG = Log.forClass(RarFileHandler.class);
 
-	public RarFileHandler(EpisodeNamer namer, boolean overwrite) {
-		this.namer = namer;
+    protected final File destDir;
+    protected final boolean overwrite;
+    private final boolean delete;
+
+    public RarFileHandler(File destDir, boolean overwrite, boolean delete) {
+        this.destDir = destDir;
 		this.overwrite = overwrite;
+        this.delete = delete;
+
+        if (!destDir.exists())
+            destDir.mkdirs();
 	}
 
 	@Override
-	public String[] getHandledExtensions() {
+	public Collection<String> getHandledExtensions() {
 		return EXTENSIONS;
 	}
+
+    protected boolean acceptFile(String path) {
+        return true;
+    }
+
+    protected File getDestinationFile(String path) {
+        return new File(destDir.getAbsolutePath() + File.separator + path);
+    }
 
 	@Override
 	public void handleFile(String relativePath, File file) throws IOException {
 		try {
 			final Archive archive = new Archive(file);
 
-			boolean handled = false;
+			int handled = 0;
 
 			final List<FileHeader> fileHeaders = archive.getFileHeaders();
 			for (FileHeader fileHeader : fileHeaders) {
-				final FilenameParser.Parts parts = FilenameParser.parse(fileHeader.getFileNameString());
-				if (parts == null) {
-					if (logger.isDebugEnabled())
-						logger.debug("Skipping unparsable rar file contents: " + fileHeader.getFileNameString());
+                if (!this.acceptFile(fileHeader.getFileNameString()))
+                    continue;
 
-					continue;
-				}
-
-				final File destFile = namer.getEpisodeFile(fileHeader.getFileNameString(), parts.getTitle(), parts.getSeason(), parts.getEpisode());
+                final String path = PATH_NORMALISATION_REGEX.matcher(fileHeader.getFileNameString()).replaceAll(File.separator);
+                final File destFile = this.getDestinationFile(path);
 				if (!overwrite && destFile.exists())
 					continue;
 
-				if (logger.isTraceEnabled())
-					logger.trace("Extracting {} to {}", fileHeader.getFileNameString(), destFile.getAbsoluteFile());
+				if (LOG.isTraceEnabled())
+					LOG.trace("Extracting {} to {}", fileHeader.getFileNameString(), destFile.getAbsoluteFile());
 
 				// Make the parent directory if required
 				final File destDir = destFile.getParentFile();
 				if (!destDir.exists())
 					destDir.mkdirs();
 
-				final BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(destFile));
+				final OutputStream out = new FileOutputStream(destFile);
 
 				try {
 					archive.extractFile(fileHeader, out);
-					handled = true;
+					handled++;
 				}
 				finally {
 					out.close();
 				}
 			}
 
-			if (!handled)
-				throw new IOException("Skipping rar file with no handlable contents: " + file.getName());
+			if (handled < 1)
+				throw new IOException("Skipping rar file with no handleable contents: " + file.getName());
+
+            if (delete) {
+                if (LOG.isDebugEnabled())
+                    LOG.debug("Deleting archive {} after extracting {} files", file.getName(), handled);
+
+                file.delete();
+            }
 		}
 		catch (RarException e) {
 			throw new IOException(e);
