@@ -163,7 +163,7 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         env.addResource(new BackfillResource(shows, backfillManager));
 
         // Add ping healthchecks for torrents, calendar, and backfill
-        env.addHealthCheck(new ParserHealthcheck(torrentFeedManager, calendarFeedManager, backfillManager));
+        env.addHealthCheck(new ParserHealthcheck(config.getHttpClientConfiguration().getConnectionTimeout(), torrentFeedManager, calendarFeedManager, backfillManager));
         env.addHealthCheck(new DatabaseHealthCheck(shows));
     }
 }

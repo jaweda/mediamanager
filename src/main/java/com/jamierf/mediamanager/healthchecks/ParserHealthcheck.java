@@ -14,23 +14,23 @@ import java.util.Collection;
 
 public class ParserHealthcheck extends HealthCheck {
 
-    private static final Duration PING_TIMEOUT = Duration.seconds(5);
-
     private static final Log LOG = Log.forClass(ParserHealthcheck.class);
 
-    private static boolean isReachable(String host, long timeout) {
+    private static boolean isReachable(String host, Duration timeout) {
         try {
-            return InetAddress.getByName(host).isReachable((int) timeout);
+            return InetAddress.getByName(host).isReachable((int) timeout.toMilliseconds());
         }
         catch (IOException e) {
             return false;
         }
     }
 
+    private final Duration timeout;
     private final ParsingManager[] managers;
 
-    public ParserHealthcheck(ParsingManager ... managers) {
+    public ParserHealthcheck(Duration timeout, ParsingManager ... managers) {
         super("parsers");
+        this.timeout = timeout;
 
         this.managers = managers;
     }
@@ -49,14 +49,13 @@ public class ParserHealthcheck extends HealthCheck {
     @Override
     protected Result check() throws Exception {
         final Collection<String> hosts = this.collectHosts();
-        final long timeout = PING_TIMEOUT.toMilliseconds();
 
         for (String host : hosts) {
             try {
                 final long startTime = System.currentTimeMillis();
 
                 if (!ParserHealthcheck.isReachable(host, timeout)) {
-                    final String errorMessage = String.format("Ping for %s timed out after %s", PING_TIMEOUT, host);
+                    final String errorMessage = String.format("Ping for %s timed out after %s", timeout, host);
                     LOG.warn(errorMessage);
 
                     return Result.unhealthy(errorMessage);
