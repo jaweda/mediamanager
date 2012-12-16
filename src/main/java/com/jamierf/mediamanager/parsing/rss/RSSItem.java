@@ -1,6 +1,7 @@
 package com.jamierf.mediamanager.parsing.rss;
 
 import com.google.common.base.Objects;
+import com.jamierf.mediamanager.parsing.DownloadableItem;
 import com.jamierf.mediamanager.parsing.FeedItem;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -8,7 +9,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import java.net.URL;
 import java.util.Date;
 
-public class RSSItem implements FeedItem {
+public class RSSItem implements FeedItem, DownloadableItem {
 
     @JsonProperty
 	private final String guid;

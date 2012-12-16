@@ -15,7 +15,11 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -55,7 +59,7 @@ public class RSSParser extends FeedParser<RSSItem> {
 	}
 
     @Override
-    protected Set<RSSItem> parse(InputStream in) throws DocumentException {
+    protected Set<RSSItem> parse(Reader in) throws DocumentException, UnsupportedEncodingException {
         final Document doc = reader.read(in);
 
         @SuppressWarnings("unchecked")

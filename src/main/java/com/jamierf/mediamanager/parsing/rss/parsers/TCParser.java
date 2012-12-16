@@ -10,14 +10,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Properties;
 
 public class TCParser extends RSSParser {
 
 	private static final String FEED_URL = "http://tehconnection.eu/feeds.php?feed=torrents_all&user=%d&auth=%s&passkey=%s&authkey=%s";
 
 	public TCParser(HttpClientFactory clientFactory, ParserConfiguration config) throws MalformedURLException, ParserException {
-		super (clientFactory, String.format(FEED_URL, config.getLong("userId"), config.getString("authId"), config.getString("passKey"), config.getString("authKey")));
+		super (clientFactory, String.format(FEED_URL, config.getInt("userId"), config.getString("authId"), config.getString("passKey"), config.getString("authKey")));
 	}
 
 	@Override

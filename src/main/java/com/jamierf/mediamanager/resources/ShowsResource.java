@@ -20,6 +20,6 @@ public class ShowsResource {
 
     @GET
     public Response getShowsDatabase() {
-        return Response.status(Response.Status.OK).entity(shows.getEpisodes()).build();
+        return Response.status(Response.Status.OK).entity(shows.getAllEpisodes()).build();
     }
 }

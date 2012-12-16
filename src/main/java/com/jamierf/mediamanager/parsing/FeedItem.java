@@ -1,4 +1,6 @@
 package com.jamierf.mediamanager.parsing;
 
-public interface FeedItem {
+import com.jamierf.mediamanager.io.ParsedItem;
+
+public interface FeedItem extends ParsedItem {
 }

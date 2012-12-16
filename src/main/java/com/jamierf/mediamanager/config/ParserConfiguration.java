@@ -4,8 +4,8 @@ import java.util.HashMap;
 
 public class ParserConfiguration extends HashMap<String, Object> {
 
-    public long getLong(String key) {
-        return (Long) super.get(key);
+    public int getInt(String key) {
+        return (Integer) super.get(key);
     }
 
     public String getString(String key) {

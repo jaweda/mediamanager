@@ -1,6 +1,8 @@
 package com.jamierf.mediamanager.parsing;
 
-public interface FeedListener<T extends FeedItem> {
+import com.jamierf.mediamanager.io.ParsedItem;
+
+public interface ItemListener<T extends ParsedItem> {
 	public void onNewItem(T item);
 	public void onException(Throwable cause);
 }

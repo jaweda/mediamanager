@@ -1,33 +1,33 @@
 package com.jamierf.mediamanager.listeners;
 
+import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.downloader.Downloader;
 import com.jamierf.mediamanager.models.Episode;
-import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.models.State;
-import com.jamierf.mediamanager.parsing.FeedListener;
+import com.jamierf.mediamanager.parsing.DownloadableItem;
 import com.jamierf.mediamanager.parsing.EpisodeNameParser;
-import com.jamierf.mediamanager.parsing.rss.RSSItem;
+import com.jamierf.mediamanager.parsing.ItemListener;
 import com.yammer.dropwizard.logging.Log;
 
 import java.io.IOException;
 import java.util.Set;
 
-public class TorrentItemListener implements FeedListener<RSSItem> {
+public class DownloadableItemListener implements ItemListener<DownloadableItem> {
 
-    private static final Log LOG = Log.forClass(TorrentItemListener.class);
+    private static final Log LOG = Log.forClass(DownloadableItemListener.class);
 
     private final Set<String> desiredQualities;
     private final ShowDatabase shows;
     private final Downloader torrentDownloader;
 
-    public TorrentItemListener(Set<String> desiredQualities, ShowDatabase shows, Downloader torrentDownloader) {
+    public DownloadableItemListener(Set<String> desiredQualities, ShowDatabase shows, Downloader torrentDownloader) {
         this.desiredQualities = desiredQualities;
         this.shows = shows;
         this.torrentDownloader = torrentDownloader;
     }
 
     @Override
-    public void onNewItem(RSSItem item) {
+    public void onNewItem(DownloadableItem item) {
         final Episode.Name name = EpisodeNameParser.parseFilename(item.getTitle());
         if (name == null) {
             if (LOG.isTraceEnabled())
@@ -46,17 +46,17 @@ public class TorrentItemListener implements FeedListener<RSSItem> {
             return;
         }
 
-        if (episode == null || !episode.isDesired()) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("Skipping {} episode s{}e{}, not desired", name.getTitle(), name.getSeason(), name.getEpisode());
+        if (episode == null || !episode.isDesiredNow()) {
+            if (LOG.isTraceEnabled())
+                LOG.trace("Skipping {} episode s{}e{}, not desired", name.getTitle(), name.getSeason(), name.getEpisode());
 
             return;
         }
 
         // Check it is a desired quality
         if (!desiredQualities.contains(name.getQuality())) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("Skipping torrent {} s{}e{}, undesired quality: {} (desired: {})", name.getTitle(), name.getSeason(), name.getEpisode(), name.getQuality(), desiredQualities);
+            if (LOG.isTraceEnabled())
+                LOG.trace("Skipping torrent {} s{}e{}, undesired quality: {} (desired: {})", name.getTitle(), name.getSeason(), name.getEpisode(), name.getQuality(), desiredQualities);
 
             return;
         }
@@ -85,6 +85,6 @@ public class TorrentItemListener implements FeedListener<RSSItem> {
 
     @Override
     public void onException(Throwable cause) {
-        LOG.error(cause, "Failed parsing torrent item");
+        LOG.error(cause, "Failed parsing downloadable item");
     }
 }

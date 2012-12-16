@@ -10,5 +10,6 @@ public interface ShowDatabase extends Managed {
     public boolean addOrUpdate(Episode episode);
     public boolean addIfNotExists(Episode episode) throws Exception;
     public Episode get(Episode.Name name) throws Exception;
-    public Collection<Episode> getEpisodes();
+    public Collection<Episode> getAllEpisodes();
+    public Collection<Episode> getDesiredEpisodes();
 }

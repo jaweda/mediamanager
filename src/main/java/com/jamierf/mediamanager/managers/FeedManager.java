@@ -2,9 +2,11 @@ package com.jamierf.mediamanager.managers;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.jamierf.mediamanager.io.ParsedItem;
 import com.jamierf.mediamanager.parsing.FeedItem;
-import com.jamierf.mediamanager.parsing.FeedListener;
+import com.jamierf.mediamanager.parsing.ItemListener;
 import com.jamierf.mediamanager.parsing.FeedParser;
+import com.jamierf.mediamanager.parsing.rss.RSSItem;
 import com.yammer.dropwizard.lifecycle.Managed;
 import com.yammer.dropwizard.logging.Log;
 import com.yammer.dropwizard.util.Duration;
@@ -23,7 +25,7 @@ public class FeedManager<T extends FeedItem> implements Managed, Runnable {
     private final ScheduledExecutorService bossPool;
     private final ExecutorService workerPool;
     private final Collection<FeedParser<T>> parsers;
-    private final Collection<FeedListener<T>> listeners;
+    private final Collection<ItemListener<T>> listeners;
     private final Set<T> oldItems; // TODO: This should be a bounded queue, but needs efficient contains()
     private final AtomicReference<ScheduledFuture<?>> future;
 
@@ -87,7 +89,7 @@ public class FeedManager<T extends FeedItem> implements Managed, Runnable {
 
         // Alert every listener of each item and exception
         synchronized (listeners) {
-            for (final FeedListener<T> listener : listeners) {
+            for (final ItemListener<T> listener : listeners) {
                 workerPool.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -127,13 +129,13 @@ public class FeedManager<T extends FeedItem> implements Managed, Runnable {
         }
     }
 
-    public void addListener(FeedListener<T> listener) {
+    public void addListener(ItemListener<T> listener) {
         synchronized (listeners) {
             listeners.add(listener);
         }
     }
 
-    public void removeListener(FeedListener<T> listener) {
+    public void removeListener(ItemListener<T> listener) {
         synchronized (listeners) {
             listeners.remove(listener);
         }

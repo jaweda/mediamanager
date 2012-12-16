@@ -10,6 +10,7 @@
         <unrar.version>1.7.0</unrar.version>
         <dom4j.version>1.6.1</dom4j.version>
         <jaxen.version>1.1.1</jaxen.version>
+        <jsoup.version>1.7.1</jsoup.version>
         <ical4j.version>1.0.4</ical4j.version>
         <reflections.version>0.9.8</reflections.version>
         <bdb.version>4.0.92</bdb.version>
@@ -151,6 +152,11 @@
             <groupId>com.sleepycat</groupId>
             <artifactId>je</artifactId>
             <version>${bdb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>${jsoup.version}</version>
         </dependency>
 	</dependencies>
 </project>

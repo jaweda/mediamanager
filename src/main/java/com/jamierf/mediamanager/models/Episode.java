@@ -1,5 +1,7 @@
 package com.jamierf.mediamanager.models;
 
+import com.google.common.base.Strings;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -86,7 +88,20 @@ public class Episode {
 
         @Override
         public String toString() {
-            return String.format("%s s%de%d", title, season, episode);
+            final StringBuilder builder = new StringBuilder();
+
+            builder.append(title);
+            builder.append(" ");
+
+            builder.append("s").append(Strings.padStart(String.valueOf(season), 2, '0'));
+            builder.append("e").append(Strings.padStart(String.valueOf(episode), 2, '0'));
+
+            if (quality != null && !quality.isEmpty()) {
+                builder.append(" ");
+                builder.append(quality);
+            }
+
+            return builder.toString();
         }
     }
 
@@ -124,6 +139,11 @@ public class Episode {
 
     @JsonIgnore
     public boolean isDesired() {
+        return state == State.DESIRED;
+    }
+
+    @JsonIgnore
+    public boolean isDesiredNow() {
         if (state != State.DESIRED)
             return false;
 

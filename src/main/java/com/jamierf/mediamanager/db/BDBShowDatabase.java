@@ -72,25 +72,45 @@ public class BDBShowDatabase implements ShowDatabase {
     }
 
     @Override
-    public Collection<Episode> getEpisodes() {
+    public Collection<Episode> getAllEpisodes() {
         final ImmutableSet.Builder<Episode> episodes = ImmutableSet.builder();
 
         final Cursor cursor = db.openCursor(null, null);
 
-        final DatabaseEntry key = new DatabaseEntry();
-        final DatabaseEntry value = new DatabaseEntry();
+        try {
+            final DatabaseEntry key = new DatabaseEntry();
+            final DatabaseEntry value = new DatabaseEntry();
 
-        while (cursor.getNext(key, value, LockMode.DEFAULT) == OperationStatus.SUCCESS) {
-            try {
-                final Episode episode = JSON.readValue(value.getData(), Episode.class);
-                episodes.add(episode);
+            while (cursor.getNext(key, value, LockMode.DEFAULT) == OperationStatus.SUCCESS) {
+                try {
+                    final Episode episode = JSON.readValue(value.getData(), Episode.class);
+                    episodes.add(episode);
+                }
+                catch (IOException e) {
+                    LOG.warn(e, "Failed to read row from database");
+                }
             }
-            catch (IOException e) {
-                LOG.warn(e, "Failed to read row from database");
-            }
+        }
+        finally {
+            cursor.close();
         }
 
         return episodes.build();
+    }
+
+    @Override
+    public Collection<Episode> getDesiredEpisodes() {
+        // TODO: Only query for desired episodes! This db query should be more efficient...
+        final ImmutableSet.Builder<Episode> desired = ImmutableSet.builder();
+
+        for (Episode episode : this.getAllEpisodes()) {
+            if (!episode.isDesired())
+                continue;
+
+            desired.add(episode);
+        }
+
+        return desired.build();
     }
 
     @Override

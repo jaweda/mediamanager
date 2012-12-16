@@ -20,10 +20,16 @@ public class TorrentConfiguration {
     private Duration updateDelay = Duration.minutes(15);
 
     @JsonProperty
+    private Duration backfillDelay = Duration.days(7);
+
+    @JsonProperty
     private Set<String> qualities = EpisodeNameParser.EPISODE_QUALITIES;
 
     @JsonProperty
-    private Map<String, ParserConfiguration> parsers = Collections.emptyMap();
+    private Map<String, ParserConfiguration> feeders = Collections.emptyMap();
+
+    @JsonProperty
+    private Map<String, ParserConfiguration> searchers = Collections.emptyMap();
 
     public File getWatchDir() {
         return watchDir;
@@ -33,11 +39,19 @@ public class TorrentConfiguration {
         return updateDelay;
     }
 
+    public Duration getBackfillDelay() {
+        return backfillDelay;
+    }
+
     public Set<String> getQualities() {
         return qualities;
     }
 
-    public Map<String, ParserConfiguration> getParsers() {
-        return parsers;
+    public Map<String, ParserConfiguration> getFeeders() {
+        return feeders;
+    }
+
+    public Map<String, ParserConfiguration> getSearchers() {
+        return searchers;
     }
 }

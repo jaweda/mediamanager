@@ -1,26 +1,29 @@
 package com.jamierf.mediamanager.listeners;
 
+import com.jamierf.mediamanager.managers.BackfillManager;
 import com.jamierf.mediamanager.models.Episode;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.models.State;
 import com.jamierf.mediamanager.parsing.EpisodeNameParser;
-import com.jamierf.mediamanager.parsing.FeedListener;
+import com.jamierf.mediamanager.parsing.ItemListener;
 import com.jamierf.mediamanager.parsing.ical.CalendarItem;
 import com.yammer.dropwizard.logging.Log;
 import com.yammer.dropwizard.util.Duration;
 
 import java.util.Calendar;
 
-public class CalendarItemListener implements FeedListener<CalendarItem> {
+public class CalendarItemListener implements ItemListener<CalendarItem> {
 
     private static final Log LOG = Log.forClass(CalendarItemListener.class);
 
     private final ShowDatabase shows;
+    private final BackfillManager backfillManager;
     private final Duration beforeDuration;
     private final Duration afterDuration;
 
-    public CalendarItemListener(ShowDatabase shows, Duration beforeDuration, Duration afterDuration) {
+    public CalendarItemListener(ShowDatabase shows, BackfillManager backfillManager, Duration beforeDuration, Duration afterDuration) {
         this.shows = shows;
+        this.backfillManager = backfillManager;
         this.beforeDuration = beforeDuration;
         this.afterDuration = afterDuration;
     }
@@ -55,6 +58,9 @@ public class CalendarItemListener implements FeedListener<CalendarItem> {
 
             if (LOG.isInfoEnabled())
                 LOG.info("Added new desired episode {}", episode);
+
+            // Schedule backfill now that we know about a new episode
+            backfillManager.schedule();
         }
         catch (Exception e) {
             LOG.error(e, "Failed to insert episode in to database");

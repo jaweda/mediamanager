@@ -16,7 +16,7 @@ public class WhatCDParser extends RSSParser {
 	private static final String FEED_URL = "https://ssl.what.cd/feeds.php?feed=torrents_all&user=%d&auth=%s&passkey=%s&authkey=%s";
 
 	public WhatCDParser(HttpClientFactory clientFactory, ParserConfiguration config) throws MalformedURLException, ParserException {
-		super (clientFactory, String.format(FEED_URL, config.getLong("userId"), config.getString("authId"), config.getString("passKey"), config.getString("authKey")));
+		super (clientFactory, String.format(FEED_URL, config.getInt("userId"), config.getString("authId"), config.getString("passKey"), config.getString("authKey")));
 	}
 
 	@Override

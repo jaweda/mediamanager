@@ -11,6 +11,9 @@ import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -41,7 +44,7 @@ public class CalendarParser extends FeedParser<CalendarItem> {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected Set<CalendarItem> parse(InputStream in) throws Exception {
+    protected Set<CalendarItem> parse(Reader in) throws Exception {
         final Calendar calendar = builder.build(in);
 
         final ImmutableSet.Builder<CalendarItem> items = ImmutableSet.builder();
