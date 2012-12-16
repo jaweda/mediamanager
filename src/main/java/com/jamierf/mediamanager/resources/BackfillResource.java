@@ -6,16 +6,26 @@ import com.jamierf.mediamanager.models.Episode;
 import com.jamierf.mediamanager.models.State;
 import com.jamierf.mediamanager.parsing.EpisodeNameParser;
 import com.yammer.dropwizard.logging.Log;
+import com.yammer.dropwizard.views.View;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Path("/backfill")
-@Produces(MediaType.APPLICATION_JSON)
 public class BackfillResource {
 
     private static final Log LOG = Log.forClass(BackfillResource.class);
+
+    public static class BackfillForm extends View {
+        public BackfillForm() {
+            super("backfill.mustache");
+        }
+
+        public String getTitle() {
+            return "Backfill";
+        }
+    }
 
     private final ShowDatabase shows;
     private final BackfillManager manager;
@@ -25,8 +35,16 @@ public class BackfillResource {
         this.manager = manager;
     }
 
-    @PUT
-    public Response markEpisode(@QueryParam("episode") String query) {
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public View displayForm() {
+        return new BackfillResource.BackfillForm();
+    }
+
+    @POST
+    @Path("/enqueue")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response enqueue(@FormParam("query") String query) {
         final Episode.Name name = EpisodeNameParser.parseFilename(query);
         if (name == null)
             return Response.status(Response.Status.BAD_REQUEST).entity("Failed to parse requested episode name").build();
@@ -42,6 +60,8 @@ public class BackfillResource {
     }
 
     @POST
+    @Path("/schedule")
+    @Produces(MediaType.TEXT_PLAIN)
     public Response schedule() {
         manager.schedule();
 

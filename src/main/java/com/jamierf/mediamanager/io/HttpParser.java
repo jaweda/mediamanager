@@ -98,7 +98,7 @@ public abstract class HttpParser<T extends ParsedItem> {
         cookies.add(cookie);
     }
 
-    protected URI getUrl() {
+    public URI getUrl() {
         return url;
     }
 
@@ -139,12 +139,9 @@ public abstract class HttpParser<T extends ParsedItem> {
 
         try {
             if (LOG.isTraceEnabled())
-                LOG.trace("Fetched result from {}", url);
+                LOG.trace("Fetching result from {}", url);
 
             final Set<T> items = this.parse(new InputStreamReader(in, encoding));
-
-            if (LOG.isDebugEnabled())
-                LOG.debug("Parsed {} results from {}", items.size(), url);
 
             return items;
         }

@@ -1,5 +1,7 @@
 package com.jamierf.mediamanager.db;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.jamierf.mediamanager.config.DatabaseConfiguration;
 import com.jamierf.mediamanager.models.Episode;
@@ -14,6 +16,7 @@ import java.util.Collection;
 public class BDBShowDatabase implements ShowDatabase {
 
     private static final Log LOG = Log.forClass(BDBShowDatabase.class);
+
     private static final String DB_NAME = "shows.db";
 
     private static final Json JSON = new Json();
@@ -100,23 +103,32 @@ public class BDBShowDatabase implements ShowDatabase {
 
     @Override
     public Collection<Episode> getDesiredEpisodes() {
-        // TODO: Only query for desired episodes! This db query should be more efficient...
-        final ImmutableSet.Builder<Episode> desired = ImmutableSet.builder();
-
-        for (Episode episode : this.getAllEpisodes()) {
-            if (!episode.isDesired())
-                continue;
-
-            desired.add(episode);
-        }
-
-        return desired.build();
+        return Collections2.filter(this.getAllEpisodes(), new Predicate<Episode>() {
+            @Override
+            public boolean apply(Episode episode) {
+                return episode.isDesired();
+            }
+        });
     }
 
     @Override
     public void start() throws Exception {
         env = new Environment(file, new EnvironmentConfig().setAllowCreate(true));
         db = env.openDatabase(null, DB_NAME, new DatabaseConfig().setAllowCreate(true));
+    }
+
+    @Override
+    public boolean isConnected() {
+        try {
+            if (!env.isValid())
+                return false;
+
+            db.count();
+            return true;
+        }
+        catch (DatabaseException e) {
+            return false;
+        }
     }
 
     @Override

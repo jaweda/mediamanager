@@ -1,5 +1,6 @@
 package com.jamierf.mediamanager.managers;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.jamierf.mediamanager.db.ShowDatabase;
@@ -18,7 +19,7 @@ import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class BackfillManager implements Managed, Runnable {
+public class BackfillManager implements Managed, Runnable, ParsingManager {
 
     private static final Log LOG = Log.forClass(BackfillManager.class);
 
@@ -76,13 +77,17 @@ public class BackfillManager implements Managed, Runnable {
     @Override
     public void run() {
         if (parsers.isEmpty()) {
-            LOG.info("Skipping backfill, we have no search parsers");
+            if (LOG.isDebugEnabled())
+                LOG.debug("Skipping backfill, we have no search parsers");
+
             return;
         }
 
         final Collection<Episode> episodes = shows.getDesiredEpisodes();
         if (episodes.isEmpty()) {
-            LOG.info("Skipping backfill, we have all desired episodes");
+            if (LOG.isDebugEnabled())
+                LOG.debug("Skipping backfill, we have all desired episodes");
+
             return;
         }
 
@@ -164,6 +169,12 @@ public class BackfillManager implements Managed, Runnable {
     public void addParser(SearchParser parser) {
         synchronized (parsers) {
             parsers.add(parser);
+        }
+    }
+
+    public Collection<SearchParser> getParsers() {
+        synchronized (parsers) {
+            return ImmutableSet.copyOf(parsers);
         }
     }
 

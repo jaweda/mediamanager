@@ -1,5 +1,6 @@
 package com.jamierf.mediamanager.managers;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.jamierf.mediamanager.io.ParsedItem;
@@ -17,7 +18,7 @@ import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class FeedManager<T extends FeedItem> implements Managed, Runnable {
+public class FeedManager<T extends FeedItem> implements Managed, Runnable, ParsingManager {
 
     private static final Log LOG = Log.forClass(FeedManager.class);
 
@@ -120,6 +121,12 @@ public class FeedManager<T extends FeedItem> implements Managed, Runnable {
     public void addParser(FeedParser<T> parser) {
         synchronized (parsers) {
             parsers.add(parser);
+        }
+    }
+
+    public Collection<FeedParser<T>> getParsers() {
+        synchronized (parsers) {
+            return ImmutableSet.copyOf(parsers);
         }
     }
 

@@ -12,4 +12,5 @@ public interface ShowDatabase extends Managed {
     public Episode get(Episode.Name name) throws Exception;
     public Collection<Episode> getAllEpisodes();
     public Collection<Episode> getDesiredEpisodes();
+    public boolean isConnected();
 }

@@ -7,6 +7,8 @@ import com.jamierf.mediamanager.downloader.Downloader;
 import com.jamierf.mediamanager.downloader.WatchDirDownloader;
 import com.jamierf.mediamanager.handler.MediaFileHandler;
 import com.jamierf.mediamanager.handler.MediaRarFileHandler;
+import com.jamierf.mediamanager.healthchecks.DatabaseHealthCheck;
+import com.jamierf.mediamanager.healthchecks.ParserHealthcheck;
 import com.jamierf.mediamanager.io.InsecureHttpClientFactory;
 import com.jamierf.mediamanager.listeners.CalendarItemListener;
 import com.jamierf.mediamanager.listeners.DownloadableItemListener;
@@ -24,11 +26,14 @@ import com.jamierf.mediamanager.parsing.rss.parsers.RSSParser;
 import com.jamierf.mediamanager.parsing.search.SearchItem;
 import com.jamierf.mediamanager.parsing.search.SearchParser;
 import com.jamierf.mediamanager.resources.BackfillResource;
+import com.jamierf.mediamanager.io.StaticAssetForwarder;
+import com.jamierf.mediamanager.resources.MediaManagerResource;
 import com.jamierf.mediamanager.resources.ShowsResource;
 import com.yammer.dropwizard.Service;
+import com.yammer.dropwizard.bundles.AssetsBundle;
 import com.yammer.dropwizard.client.HttpClientFactory;
 import com.yammer.dropwizard.config.Environment;
-import com.yammer.dropwizard.util.Duration;
+import com.yammer.dropwizard.views.ViewBundle;
 
 import java.io.IOException;
 import java.util.Map;
@@ -110,6 +115,14 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         return downloadDirManager;
     }
 
+    public MediaManager() {
+        // Enable views
+        super.addBundle(new ViewBundle());
+
+        // Enable assets
+        super.addBundle(new AssetsBundle());
+    }
+
     @Override
     protected void initialize(MediaManagerConfiguration config, Environment env) throws Exception {
         final HttpClientFactory clientFactory = new InsecureHttpClientFactory(config.getHttpClientConfiguration());
@@ -141,8 +154,16 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
 		final DownloadDirManager downloadDirManager = MediaManager.buildDownloadDirManager(config.getFileConfiguration());
         env.manage(downloadDirManager);
 
+        // Add a filter to redirect favicon to the static assets directory
+        env.addFilter(new StaticAssetForwarder(), "/favicon.*");
+
         // Add API endpoints
+        env.addResource(new MediaManagerResource());
         env.addResource(new ShowsResource(shows));
         env.addResource(new BackfillResource(shows, backfillManager));
+
+        // Add ping healthchecks for torrents, calendar, and backfill
+        env.addHealthCheck(new ParserHealthcheck(torrentFeedManager, calendarFeedManager, backfillManager));
+        env.addHealthCheck(new DatabaseHealthCheck(shows));
     }
 }

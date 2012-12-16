@@ -16,6 +16,9 @@ public class Episode {
         private static final Pattern SHOW_TITLE_CLEAN_REGEX = Pattern.compile("[\\W]", Pattern.CASE_INSENSITIVE);
 
         private static String cleanShowTitle(String title) {
+            if (title == null)
+                return null;
+
             return SHOW_TITLE_CLEAN_REGEX.matcher(title).replaceAll("").toLowerCase();
         }
 
@@ -49,7 +52,7 @@ public class Episode {
 
         @JsonIgnore
         public String getCleanedTitle() {
-            return title == null ? null : Name.cleanShowTitle(title);
+            return Name.cleanShowTitle(title);
         }
 
         public int getSeason() {

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    {{> head}}
+    <body>
+        <h1>{{title}}</h1>
+        <form action="/backfill/enqueue" method="POST">
+            <div>
+                <input type="text" name="query" value="" />
+                <input type="submit" value="Enqueue" />
+            </div>
+        </form>
+        <form action="/backfill/schedule" method="POST">
+            <div>
+                <input type="submit" value="Schedule" />
+            </div>
+        </form>
+    </body>
+</html>
