@@ -92,14 +92,14 @@ public class RSSParser extends FeedParser<RSSItem> {
 		final String link = RSSParser.getNodeText(e, "link", "");
 		final String description = RSSParser.getNodeText(e, "description", "");
 
-		return this.newItem(guid == null ? link : guid, title, this.parseDate(date), new URL(link), description);
+		return this.newItem(guid == null ? link : guid, title, this.parseDate(date), URI.create(link), description);
 	}
 
 	protected Date parseDate(String date) throws ParseException {
 		return DATE_FORMAT.parse(date);
 	}
 
-	protected RSSItem newItem(String guid, String title, Date date, URL link, String description) throws MalformedURLException, ParseException {
+	protected RSSItem newItem(String guid, String title, Date date, URI link, String description) throws MalformedURLException, ParseException {
 		return new RSSItem(guid, title, date, link, description);
 	}
 }

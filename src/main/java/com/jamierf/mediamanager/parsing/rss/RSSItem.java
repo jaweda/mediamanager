@@ -6,7 +6,7 @@ import com.jamierf.mediamanager.parsing.FeedItem;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.Date;
 
 public class RSSItem implements FeedItem, DownloadableItem {
@@ -21,7 +21,7 @@ public class RSSItem implements FeedItem, DownloadableItem {
 	private final Date date;
 
     @JsonProperty
-	private final URL link;
+	private final URI link;
 
     @JsonProperty
 	private final String description;
@@ -31,7 +31,7 @@ public class RSSItem implements FeedItem, DownloadableItem {
             @JsonProperty("guid") String guid,
             @JsonProperty("title") String title,
             @JsonProperty("date") Date date,
-            @JsonProperty("link") URL link,
+            @JsonProperty("link") URI link,
             @JsonProperty("description") String description) {
 		this.guid = guid;
 		this.title = title;
@@ -52,7 +52,7 @@ public class RSSItem implements FeedItem, DownloadableItem {
 		return date;
 	}
 
-	public URL getLink() {
+	public URI getLink() {
 		return link;
 	}
 

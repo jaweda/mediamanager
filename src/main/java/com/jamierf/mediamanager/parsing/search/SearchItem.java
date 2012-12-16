@@ -5,7 +5,7 @@ import com.jamierf.mediamanager.io.ParsedItem;
 import com.jamierf.mediamanager.parsing.DownloadableItem;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import java.net.URL;
+import java.net.URI;
 
 public class SearchItem implements ParsedItem, DownloadableItem {
 
@@ -16,12 +16,12 @@ public class SearchItem implements ParsedItem, DownloadableItem {
     private final String title;
 
     @JsonProperty
-    private final URL link;
+    private final URI link;
 
     public SearchItem(
             @JsonProperty("id") int id,
             @JsonProperty("title") String title,
-            @JsonProperty("url") URL link) {
+            @JsonProperty("link") URI link) {
         this.id = id;
         this.title = title;
         this.link = link;
@@ -35,7 +35,7 @@ public class SearchItem implements ParsedItem, DownloadableItem {
         return title;
     }
 
-    public URL getLink() {
+    public URI getLink() {
         return link;
     }
 

@@ -16,6 +16,9 @@ public class FileConfiguration {
     private File destinationDir;
 
     @JsonProperty
+    private int concurrentDownloads = 10;
+
+    @JsonProperty
     private boolean overwriteFiles = false;
 
     @JsonProperty
@@ -30,6 +33,10 @@ public class FileConfiguration {
 
     public File getDestinationDir() {
         return destinationDir;
+    }
+
+    public int getConcurrentDownloads() {
+        return concurrentDownloads;
     }
 
     public boolean isOverwriteFiles() {

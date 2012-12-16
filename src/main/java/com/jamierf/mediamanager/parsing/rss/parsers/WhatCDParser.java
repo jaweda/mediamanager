@@ -7,7 +7,7 @@ import com.yammer.dropwizard.client.HttpClientFactory;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.text.ParseException;
 import java.util.Date;
 
@@ -20,7 +20,7 @@ public class WhatCDParser extends RSSParser {
 	}
 
 	@Override
-	protected RSSItem newItem(String guid, String title, Date date, URL link, String description) throws MalformedURLException, ParseException {
+	protected RSSItem newItem(String guid, String title, Date date, URI link, String description) throws MalformedURLException, ParseException {
 		title = StringEscapeUtils.unescapeHtml(title);
 		description = StringEscapeUtils.unescapeHtml(description);
 

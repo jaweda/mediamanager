@@ -16,7 +16,10 @@ import org.jsoup.select.Elements;
 
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,9 +43,9 @@ public class HDBitsParser extends SearchParser {
         passKey = config.getString("passKey");
     }
 
-    private URL createLink(String name, int id) throws MalformedURLException, UnsupportedEncodingException {
+    private URI createLink(String name, int id) throws MalformedURLException, UnsupportedEncodingException {
         final String filename = String.format("%s.torrent", URLEncoder.encode(name, "UTF-8"));
-        return new URL(String.format(LINK_URL, filename, id, passKey));
+        return URI.create(String.format(LINK_URL, filename, id, passKey));
     }
 
     @Override
@@ -87,7 +90,7 @@ public class HDBitsParser extends SearchParser {
             return null;
 
         final int id = Integer.parseInt(matcher.group(1));
-        final URL link = this.createLink(name, id);
+        final URI link = this.createLink(name, id);
 
         return new SearchItem(id, name, link);
     }

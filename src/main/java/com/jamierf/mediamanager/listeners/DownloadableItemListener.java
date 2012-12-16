@@ -27,7 +27,7 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
     }
 
     @Override
-    public void onNewItem(DownloadableItem item) {
+    public synchronized void onNewItem(DownloadableItem item) {
         final Episode.Name name = EpisodeNameParser.parseFilename(item.getTitle());
         if (name == null) {
             if (LOG.isTraceEnabled())
