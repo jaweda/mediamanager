@@ -1,6 +1,6 @@
 package com.jamierf.mediamanager.resources;
 
-import com.jamierf.mediamanager.models.ShowDatabase;
+import com.jamierf.mediamanager.db.ShowDatabase;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -20,6 +20,6 @@ public class ShowsResource {
 
     @GET
     public Response getShowsDatabase() {
-        return Response.status(Response.Status.OK).entity(shows).build();
+        return Response.status(Response.Status.OK).entity(shows.getEpisodes()).build();
     }
 }

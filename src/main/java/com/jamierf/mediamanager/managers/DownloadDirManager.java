@@ -1,6 +1,7 @@
 package com.jamierf.mediamanager.managers;
 
 import com.google.common.collect.Maps;
+import com.jamierf.mediamanager.config.FileConfiguration;
 import com.jamierf.mediamanager.handler.FileHandler;
 import com.jamierf.mediamanager.handler.FileTypeHandler;
 import com.jamierf.mediamanager.io.DirMonitor;
@@ -20,10 +21,11 @@ public class DownloadDirManager implements FileListener, Managed {
 	private static final Log LOG = Log.forClass(DownloadDirManager.class);
 
     public static String getFileExtension(String name) {
-        if (!name.contains("."))
+        final int delim = name.lastIndexOf('.');
+        if (delim < 0)
             return "";
 
-        return name.substring(name.lastIndexOf('.') + 1).toLowerCase();
+        return name.substring(delim + 1).toLowerCase();
     }
 
 	private final DirMonitor monitor;
@@ -31,15 +33,21 @@ public class DownloadDirManager implements FileListener, Managed {
 	private final int pathTrimLength;
     private FileHandler defaultHandler;
 
-	public DownloadDirManager(File downloadDir) throws IOException {
-        if (!downloadDir.exists())
-            downloadDir.mkdirs();
+	public DownloadDirManager(FileConfiguration config) throws IOException {
+        final File destinationDir = config.getDestinationDir();
 
-		monitor = new DirMonitor(downloadDir);
+        if (!destinationDir.exists()) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("File destination directory '{}' doesn't exist, creating", destinationDir);
+
+            destinationDir.mkdirs();
+        }
+
+		monitor = new DirMonitor(destinationDir);
 		monitor.addListener(this);
 
 		fileHandlers = Maps.newHashMap();
-		pathTrimLength = downloadDir.getAbsolutePath().length();
+		pathTrimLength = destinationDir.getAbsolutePath().length();
 
         defaultHandler = null;
 	}

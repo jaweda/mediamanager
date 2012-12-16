@@ -1,6 +1,7 @@
 package com.jamierf.mediamanager.downloader;
 
 import com.google.common.hash.Hashing;
+import com.jamierf.mediamanager.config.FileConfiguration;
 import com.yammer.dropwizard.client.HttpClientFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -18,9 +19,9 @@ public class WatchDirDownloader implements Downloader {
     private final HttpClientFactory clientFactory;
 	private final File watchDir;
 
-	public WatchDirDownloader(HttpClientFactory clientFactory, File watchDir) {
+	public WatchDirDownloader(HttpClientFactory clientFactory, FileConfiguration config) {
         this.clientFactory = clientFactory;
-        this.watchDir = watchDir;
+        this.watchDir = config.getWatchDir();
 
         if (!watchDir.exists())
             watchDir.mkdirs();

@@ -9,3 +9,5 @@
 *~
 config.ini
 cache/
+config.yml
+*.db

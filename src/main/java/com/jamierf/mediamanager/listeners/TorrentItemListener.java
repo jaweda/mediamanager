@@ -2,7 +2,7 @@ package com.jamierf.mediamanager.listeners;
 
 import com.jamierf.mediamanager.downloader.Downloader;
 import com.jamierf.mediamanager.models.Episode;
-import com.jamierf.mediamanager.models.ShowDatabase;
+import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.models.State;
 import com.jamierf.mediamanager.parsing.FeedListener;
 import com.jamierf.mediamanager.parsing.EpisodeNameParser;
@@ -37,8 +37,16 @@ public class TorrentItemListener implements FeedListener<RSSItem> {
         }
 
         // Check if it is a desired episode
-        final Episode episode = shows.getDesiredEpisode(name.getTitle(), name.getSeason(), name.getEpisode());
-        if (episode == null) {
+        final Episode episode;
+        try {
+            episode = shows.get(name);
+        }
+        catch (Exception e) {
+            LOG.error(e, "Failed to fetch episode from database");
+            return;
+        }
+
+        if (episode == null || !episode.isDesired()) {
             if (LOG.isDebugEnabled())
                 LOG.debug("Skipping {} episode s{}e{}, not desired", name.getTitle(), name.getSeason(), name.getEpisode());
 
@@ -61,12 +69,17 @@ public class TorrentItemListener implements FeedListener<RSSItem> {
         try {
             // Download the torrent file
             torrentDownloader.download(item.getLink());
-
-            // Mark the episode as pending so we no longer desire it
-            episode.setState(State.EXISTS);
         }
         catch (IOException e) {
-            LOG.error("Failed to download torrent", e);
+            LOG.error(e, "Failed to download torrent");
+        }
+
+        try {
+            // Mark the episode as pending so we no longer desire it
+            shows.addOrUpdate(episode.copyWithState(State.PENDING));
+        }
+        catch (Exception e) {
+            LOG.error(e, "Failed to update episode in database");
         }
     }
 
