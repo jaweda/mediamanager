@@ -12,7 +12,7 @@ import java.util.Date;
 public class RSSItem implements FeedItem, DownloadableItem {
 
     @JsonProperty
-	private final String guid;
+	private final String uid;
 
     @JsonProperty
 	private final String title;
@@ -28,20 +28,20 @@ public class RSSItem implements FeedItem, DownloadableItem {
 
     @JsonCreator
 	public RSSItem(
-            @JsonProperty("guid") String guid,
+            @JsonProperty("uid") String uid,
             @JsonProperty("title") String title,
             @JsonProperty("date") Date date,
             @JsonProperty("link") URI link,
             @JsonProperty("description") String description) {
-		this.guid = guid;
+		this.uid = uid;
 		this.title = title;
 		this.date = date;
 		this.link = link;
 		this.description = description;
 	}
 
-	public String getGuid() {
-		return guid;
+	public String getUid() {
+		return uid;
 	}
 
 	public String getTitle() {
@@ -67,20 +67,20 @@ public class RSSItem implements FeedItem, DownloadableItem {
 
         RSSItem rssItem = (RSSItem) o;
 
-        if (guid != null ? !guid.equals(rssItem.guid) : rssItem.guid != null) return false;
+        if (uid != null ? !uid.equals(rssItem.uid) : rssItem.uid != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return guid != null ? guid.hashCode() : 0;
+        return uid != null ? uid.hashCode() : 0;
     }
 
     @Override
 	public String toString() {
 		return Objects.toStringHelper(this)
-                .add("guid", guid)
+                .add("uid", uid)
                 .add("title", title)
                 .add("date", date)
                 .add("link", link)

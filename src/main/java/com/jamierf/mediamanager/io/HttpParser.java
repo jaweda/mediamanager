@@ -141,9 +141,7 @@ public abstract class HttpParser<T extends ParsedItem> {
             if (LOG.isTraceEnabled())
                 LOG.trace("Fetching result from {}", url);
 
-            final Set<T> items = this.parse(new InputStreamReader(in, encoding));
-
-            return items;
+            return this.parse(new InputStreamReader(in, encoding));
         }
         finally {
             in.close();
