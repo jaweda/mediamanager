@@ -1,13 +1,14 @@
 package com.jamierf.mediamanager.config;
 
 import com.yammer.dropwizard.client.HttpClientConfiguration;
+import com.yammer.dropwizard.client.JerseyClientConfiguration;
 import com.yammer.dropwizard.config.Configuration;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 public class MediaManagerConfiguration extends Configuration {
 
     @JsonProperty
-    private HttpClientConfiguration httpClient = new HttpClientConfiguration();
+    private JerseyClientConfiguration httpClient = new JerseyClientConfiguration();
 
     @JsonProperty
     private DatabaseConfiguration database = new DatabaseConfiguration();
@@ -21,7 +22,7 @@ public class MediaManagerConfiguration extends Configuration {
     @JsonProperty
     private FileConfiguration files = new FileConfiguration();
 
-    public HttpClientConfiguration getHttpClientConfiguration() {
+    public JerseyClientConfiguration getHttpClientConfiguration() {
         return httpClient;
     }
 

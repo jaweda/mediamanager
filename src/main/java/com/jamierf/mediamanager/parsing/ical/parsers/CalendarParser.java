@@ -4,15 +4,18 @@ import com.google.common.collect.ImmutableSet;
 import com.jamierf.mediamanager.parsing.FeedParser;
 import com.jamierf.mediamanager.parsing.ical.CalendarItem;
 import com.yammer.dropwizard.client.HttpClientFactory;
+import com.yammer.dropwizard.client.JerseyClient;
 import com.yammer.dropwizard.logging.Log;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
 
+import javax.ws.rs.HttpMethod;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -36,16 +39,16 @@ public class CalendarParser extends FeedParser<CalendarItem> {
 
     private final CalendarBuilder builder;
 
-    public CalendarParser(HttpClientFactory clientFactory, String url) {
-        super(clientFactory, url);
+    public CalendarParser(JerseyClient client, String url) {
+        super(client, url, HttpMethod.GET);
 
         builder = new CalendarBuilder();
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected Set<CalendarItem> parse(Reader in) throws Exception {
-        final Calendar calendar = builder.build(in);
+    protected Set<CalendarItem> parse(String content) throws Exception {
+        final Calendar calendar = builder.build(new StringReader(content));
 
         final ImmutableSet.Builder<CalendarItem> items = ImmutableSet.builder();
         for (Component event : (List<Component>) calendar.getComponents()) {

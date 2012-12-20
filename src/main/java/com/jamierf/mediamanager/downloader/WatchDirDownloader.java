@@ -2,7 +2,7 @@ package com.jamierf.mediamanager.downloader;
 
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
-import com.yammer.dropwizard.client.HttpClientFactory;
+import com.yammer.dropwizard.client.JerseyClient;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -19,13 +19,13 @@ import java.util.concurrent.Executors;
 
 public class WatchDirDownloader implements Downloader {
 
-    private final HttpClientFactory clientFactory;
+    private final JerseyClient client;
 	private final File watchDir;
     private final File tempDir;
     private final ExecutorService workerPool;
 
-	public WatchDirDownloader(HttpClientFactory clientFactory, File watchDir) {
-        this.clientFactory = clientFactory;
+	public WatchDirDownloader(JerseyClient client, File watchDir) {
+        this.client = client;
         this.watchDir = watchDir;
 
         // Create a temp dir for storing the torrent files until they are ready to be moved
@@ -58,11 +58,7 @@ public class WatchDirDownloader implements Downloader {
         workerPool.submit(new Callable<Object>() {
             @Override
             public Object call() throws IOException {
-                final HttpClient client = clientFactory.build();
-
-                final HttpResponse response = client.execute(new HttpGet(link));
-
-                final InputStream in = response.getEntity().getContent();
+                final InputStream in = client.resource(link).get(InputStream.class);
                 final FileOutputStream out = new FileOutputStream(tempFile);
 
                 try {

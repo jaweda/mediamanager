@@ -1,24 +1,21 @@
 package com.jamierf.mediamanager.parsing.search.parsers;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.io.CharStreams;
 import com.jamierf.mediamanager.config.ParserConfiguration;
 import com.jamierf.mediamanager.parsing.search.SearchItem;
 import com.jamierf.mediamanager.parsing.search.SearchParser;
-import com.yammer.dropwizard.client.HttpClientFactory;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.utils.URIBuilder;
+import com.sun.jersey.api.client.WebResource;
+import com.yammer.dropwizard.client.JerseyClient;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.Reader;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.Cookie;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -31,15 +28,17 @@ public class HDBitsParser extends SearchParser {
 
     private static final Pattern URL_ID_REGEX = Pattern.compile("id=(\\d+)", Pattern.CASE_INSENSITIVE);
 
+    private final int uid;
+    private final String pass;
+    private final String hash;
     private final String passKey;
 
-    public HDBitsParser(HttpClientFactory clientFactory, ParserConfiguration config) {
-        super(clientFactory, SEARCH_URL);
+    public HDBitsParser(JerseyClient client, ParserConfiguration config) {
+        super(client, SEARCH_URL, HttpMethod.GET);
 
-        super.addCookie("uid", config.getInt("uid"));
-        super.addCookie("pass", config.getString("pass"));
-        super.addCookie("hash", config.getString("hash"));
-
+        uid = config.getInt("uid");
+        pass = config.getString("pass");
+        hash = config.getString("hash");
         passKey = config.getString("passKey");
     }
 
@@ -49,18 +48,18 @@ public class HDBitsParser extends SearchParser {
     }
 
     @Override
-    protected HttpUriRequest buildRequest(String query) throws URISyntaxException {
-        final URI url = new URIBuilder(super.getUrl())
-                .setParameter("search", query)
-                .build();
-
-        return new HttpGet(url);
+    protected WebResource.Builder buildResource(String query) {
+        return super.buildResource()
+                .queryParam("search", query)
+                .cookie(new Cookie("uid", String.valueOf(uid)))
+                .cookie(new Cookie("pass", pass))
+                .cookie(new Cookie("hash", hash));
     }
 
     @Override
-    protected Set<SearchItem> parse(Reader in) throws Exception {
+    protected Set<SearchItem> parse(String content) throws Exception {
         // Read in the entire page at once
-        final Document doc = Jsoup.parse(CharStreams.toString(in));
+        final Document doc = Jsoup.parse(content);
 
         final ImmutableSet.Builder<SearchItem> items = ImmutableSet.builder();
 

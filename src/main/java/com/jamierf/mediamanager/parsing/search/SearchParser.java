@@ -1,34 +1,30 @@
 package com.jamierf.mediamanager.parsing.search;
 
 import com.jamierf.mediamanager.io.HttpParser;
-import com.yammer.dropwizard.client.HttpClientFactory;
+import com.sun.jersey.api.client.WebResource;
+import com.yammer.dropwizard.client.JerseyClient;
 import com.yammer.dropwizard.logging.Log;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.protocol.HttpContext;
 
-import java.net.URISyntaxException;
 import java.util.Set;
 
 public abstract class SearchParser extends HttpParser<SearchItem> {
 
     private static final Log LOG = Log.forClass(SearchParser.class);
 
-    public SearchParser(HttpClientFactory clientFactory, String url) {
-        super(clientFactory, url);
+    public SearchParser(JerseyClient client, String url, String method) {
+        super(client, url, method);
     }
 
-    protected abstract HttpUriRequest buildRequest(String query) throws URISyntaxException;
+    protected abstract WebResource.Builder buildResource(String query);
 
     public Set<SearchItem> search(String query) throws Exception {
-        final HttpClient client = this.buildClient();
-        final HttpContext context = this.buildContext();
-        final HttpUriRequest request = this.buildRequest(query);
+        final WebResource.Builder resource = this.buildResource(query);
+        final String content = this.fetchContent(resource);
 
-        final Set<SearchItem> results = this.parse(client, context, request);
+        final Set<SearchItem> results = this.parse(content);
 
         if (LOG.isDebugEnabled())
-            LOG.debug("Parsed {} search results from {}", results.size(), request.getURI());
+            LOG.debug("Parsed {} search results", results.size());
 
         return results;
     }

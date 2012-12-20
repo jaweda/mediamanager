@@ -2,7 +2,10 @@ package com.jamierf.mediamanager.io;
 
 import com.google.common.collect.Lists;
 import com.jamierf.mediamanager.config.ParserConfiguration;
+import com.sun.jersey.api.client.WebResource;
 import com.yammer.dropwizard.client.HttpClientFactory;
+import com.yammer.dropwizard.client.JerseyClient;
+import com.yammer.dropwizard.client.JerseyClientFactory;
 import com.yammer.dropwizard.logging.Log;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -33,7 +36,7 @@ public abstract class HttpParser<T extends ParsedItem> {
 
     private static final Log LOG = Log.forClass(HttpParser.class);
 
-    public static <T extends HttpParser<? extends ParsedItem>> T getInstance(Class<T> base, String name, HttpClientFactory clientFactory, ParserConfiguration config) throws ClassNotFoundException {
+    public static <T extends HttpParser<? extends ParsedItem>> T getInstance(Class<T> base, String name, JerseyClient client, ParserConfiguration config) throws ClassNotFoundException {
         // Lowercase the requested name
         name = name.toLowerCase();
 
@@ -52,12 +55,12 @@ public abstract class HttpParser<T extends ParsedItem> {
                 continue;
 
             try {
-                final Constructor constructor = clazz.getDeclaredConstructor(HttpClientFactory.class, ParserConfiguration.class);
+                final Constructor constructor = clazz.getDeclaredConstructor(JerseyClient.class, ParserConfiguration.class);
 
                 if (LOG.isInfoEnabled())
                     LOG.info("Creating new parser for {}", parserName);
 
-                return base.cast(constructor.newInstance(clientFactory, config));
+                return base.cast(constructor.newInstance(client, config));
             }
             catch (NoSuchMethodException e) {
                 LOG.error(e, "Failed to load constructor of {} parser", parserName);
@@ -73,78 +76,31 @@ public abstract class HttpParser<T extends ParsedItem> {
         return null;
     }
 
-    private final HttpClientFactory clientFactory;
+    private final JerseyClient client;
     private final URI url;
-    private final Collection<Cookie> cookies;
+    private final String method;
 
-    public HttpParser(HttpClientFactory clientFactory, String url) {
-        this (clientFactory, URI.create(url));
+    public HttpParser(JerseyClient client, String url, String method) {
+        this (client, URI.create(url), method);
     }
 
-    public HttpParser(HttpClientFactory clientFactory, URI url) {
-        this.clientFactory = clientFactory;
+    public HttpParser(JerseyClient client, URI url, String method) {
+        this.client = client;
         this.url = url;
-
-        cookies = Lists.newLinkedList();
+        this.method = method;
     }
 
-    protected void addCookie(String key, Object value) {
-        final BasicClientCookie cookie = new BasicClientCookie(key, value.toString());
+    protected WebResource buildResource() {
+        return client.resource(url);
+    }
 
-        cookie.setDomain(url.getHost());
-        cookie.setPath("/");
-        cookie.setSecure(true);
-
-        cookies.add(cookie);
+    protected String fetchContent(WebResource.Builder resource) {
+        return resource.method(method, String.class);
     }
 
     public URI getUrl() {
         return url;
     }
 
-    protected HttpClient buildClient() {
-        final HttpClient client = clientFactory.build();
-
-        // Use the best guess cookie policy when deciding what cookie version to use
-        client.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BEST_MATCH);
-
-        return client;
-    }
-
-    protected HttpContext buildContext() {
-        final HttpContext context = new BasicHttpContext();
-
-        final CookieStore cookieStore = new BasicCookieStore();
-
-        for (Cookie cookie : cookies)
-            cookieStore.addCookie(cookie);
-
-        context.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
-
-        return context;
-    }
-
-    protected HttpUriRequest buildRequest() {
-        return new HttpGet(url);
-    }
-
-    protected abstract Set<T> parse(Reader reader) throws Exception;
-
-    protected Set<T> parse(HttpClient client, HttpContext context, HttpUriRequest request) throws Exception {
-        final HttpResponse response = client.execute(request, context);
-        final HttpEntity entity = response.getEntity();
-
-        final InputStream in = response.getEntity().getContent();
-        final String encoding = entity.getContentEncoding() == null ? Charset.defaultCharset().toString() : entity.getContentEncoding().getValue();
-
-        try {
-            if (LOG.isTraceEnabled())
-                LOG.trace("Fetching result from {}", url);
-
-            return this.parse(new InputStreamReader(in, encoding));
-        }
-        finally {
-            in.close();
-        }
-    }
+    protected abstract Set<T> parse(String content) throws Exception;
 }

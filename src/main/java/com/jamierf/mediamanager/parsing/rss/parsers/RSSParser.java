@@ -5,6 +5,7 @@ import com.jamierf.mediamanager.parsing.FeedParser;
 import com.jamierf.mediamanager.parsing.ParserException;
 import com.jamierf.mediamanager.parsing.rss.RSSItem;
 import com.yammer.dropwizard.client.HttpClientFactory;
+import com.yammer.dropwizard.client.JerseyClient;
 import com.yammer.dropwizard.logging.Log;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -14,10 +15,8 @@ import org.dom4j.io.SAXReader;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import javax.ws.rs.HttpMethod;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -52,15 +51,15 @@ public class RSSParser extends FeedParser<RSSItem> {
 
 	private final SAXReader reader;
 
-	public RSSParser(HttpClientFactory clientFactory, String url) throws ParserException {
-        super (clientFactory, url);
+	public RSSParser(JerseyClient client, String url) throws ParserException {
+        super (client, url, HttpMethod.GET);
 
         this.reader = RSSParser.getSAXReader();
 	}
 
     @Override
-    protected Set<RSSItem> parse(Reader in) throws DocumentException, UnsupportedEncodingException {
-        final Document doc = reader.read(in);
+    protected Set<RSSItem> parse(String content) throws DocumentException, UnsupportedEncodingException {
+        final Document doc = reader.read(new StringReader(content));
 
         @SuppressWarnings("unchecked")
         final List<Element> elements = doc.selectNodes("//rss/channel/item");
