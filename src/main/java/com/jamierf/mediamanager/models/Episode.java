@@ -1,7 +1,6 @@
 package com.jamierf.mediamanager.models;
 
 import com.google.common.base.Strings;
-import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -99,6 +98,7 @@ public class Episode {
             builder.append("s").append(Strings.padStart(String.valueOf(season), 2, '0'));
             builder.append("e").append(Strings.padStart(String.valueOf(episode), 2, '0'));
 
+            // If it has a quality rating then include that
             if (quality != null && !quality.isEmpty()) {
                 builder.append(" ");
                 builder.append(quality);
@@ -186,6 +186,6 @@ public class Episode {
 
     @Override
     public String toString() {
-        return String.format("%s (state: %s)", name, state);
+        return String.format("%s (%s)", name, state);
     }
 }

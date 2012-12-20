@@ -1,8 +1,8 @@
 package com.jamierf.mediamanager.handler;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Files;
 import com.yammer.dropwizard.logging.Log;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,13 +47,13 @@ public class MediaFileHandler implements FileTypeHandler {
 			if (LOG.isTraceEnabled())
 				LOG.trace("Moving {} to {}", relativePath, destFile.getAbsoluteFile());
 
-			FileUtils.moveFile(file, destFile);
+            Files.move(file, destFile);
 		}
 		else {
 			if (LOG.isTraceEnabled())
 				LOG.trace("Copying {} to {}", relativePath, destFile.getAbsoluteFile());
 
-			FileUtils.copyFile(file, destFile);
+            Files.copy(file, destFile);
 		}
 	}
 }

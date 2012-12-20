@@ -26,6 +26,24 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
         this.torrentDownloader = torrentDownloader;
     }
 
+    private Episode getEpisode(Episode.Name name) {
+        try {
+            return shows.get(name);
+        }
+        catch (Exception e) {
+            LOG.error(e, "Failed to fetch episode from database");
+            return null;
+        }
+    }
+
+    private void updateEpisode(Episode episode) {
+        // Make a copy with the PENDING state
+        episode = episode.copyWithState(State.PENDING);
+
+        // Update the database
+        shows.addOrUpdate(episode);
+    }
+
     @Override
     public synchronized void onNewItem(DownloadableItem item) {
         final Episode.Name name = EpisodeNameParser.parseFilename(item.getTitle());
@@ -37,18 +55,10 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
         }
 
         // Check if it is a desired episode
-        final Episode episode;
-        try {
-            episode = shows.get(name);
-        }
-        catch (Exception e) {
-            LOG.error(e, "Failed to fetch episode from database");
-            return;
-        }
-
+        final Episode episode = this.getEpisode(name);
         if (episode == null || !episode.isDesiredNow()) {
             if (LOG.isTraceEnabled())
-                LOG.trace("Skipping {} episode s{}e{}, not desired", name.getTitle(), name.getSeason(), name.getEpisode());
+                LOG.trace("Skipping {}, not desired", name);
 
             return;
         }
@@ -56,7 +66,7 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
         // Check it is a desired quality
         if (!desiredQualities.contains(name.getQuality())) {
             if (LOG.isTraceEnabled())
-                LOG.trace("Skipping torrent {} s{}e{}, undesired quality: {} (desired: {})", name.getTitle(), name.getSeason(), name.getEpisode(), name.getQuality(), desiredQualities);
+                LOG.trace("Skipping torrent {}, desired quality {}", name, desiredQualities);
 
             return;
         }
@@ -64,7 +74,7 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
         // This is an episode we want!
 
         if (LOG.isInfoEnabled())
-            LOG.info("Downloading torrent: {} s{}e{} ({})", name.getTitle(), name.getSeason(), name.getEpisode(), name.getQuality());
+            LOG.info("Downloading torrent {}", name);
 
         try {
             // Download the torrent file
@@ -76,7 +86,7 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
 
         try {
             // Mark the episode as pending so we no longer desire it
-            shows.addOrUpdate(episode.copyWithState(State.PENDING));
+            this.updateEpisode(episode);
         }
         catch (Exception e) {
             LOG.error(e, "Failed to update episode in database");

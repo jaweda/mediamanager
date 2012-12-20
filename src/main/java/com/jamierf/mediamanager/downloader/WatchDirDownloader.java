@@ -1,7 +1,7 @@
 package com.jamierf.mediamanager.downloader;
 
 import com.google.common.hash.Hashing;
-import com.jamierf.mediamanager.config.FileConfiguration;
+import com.google.common.io.Files;
 import com.yammer.dropwizard.client.HttpClientFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -21,13 +21,18 @@ public class WatchDirDownloader implements Downloader {
 
     private final HttpClientFactory clientFactory;
 	private final File watchDir;
+    private final File tempDir;
     private final ExecutorService workerPool;
 
-	public WatchDirDownloader(HttpClientFactory clientFactory, FileConfiguration config) {
+	public WatchDirDownloader(HttpClientFactory clientFactory, File watchDir) {
         this.clientFactory = clientFactory;
-        this.watchDir = config.getWatchDir();
+        this.watchDir = watchDir;
 
-        workerPool = Executors.newFixedThreadPool(config.getConcurrentDownloads());
+        // Create a temp dir for storing the torrent files until they are ready to be moved
+        tempDir = Files.createTempDir();
+        tempDir.deleteOnExit();
+
+        workerPool = Executors.newCachedThreadPool();
 
         if (!watchDir.exists())
             watchDir.mkdirs();
@@ -47,6 +52,9 @@ public class WatchDirDownloader implements Downloader {
 	public void download(final URI link) throws IOException {
         final String filename = String.format("%s.torrent", Hashing.sha1().hashString(link.toString()).toString());
 
+        final File tempFile = new File(tempDir, filename);
+        final File watchedFile = new File(watchDir, filename);
+
         workerPool.submit(new Callable<Object>() {
             @Override
             public Object call() throws IOException {
@@ -55,7 +63,7 @@ public class WatchDirDownloader implements Downloader {
                 final HttpResponse response = client.execute(new HttpGet(link));
 
                 final InputStream in = response.getEntity().getContent();
-                final FileOutputStream out = new FileOutputStream(new File(watchDir, filename));
+                final FileOutputStream out = new FileOutputStream(tempFile);
 
                 try {
                     IOUtils.copy(in, out);
@@ -65,6 +73,7 @@ public class WatchDirDownloader implements Downloader {
                     out.close();
                 }
 
+                Files.move(tempFile, watchedFile);
                 return null;
             }
         });

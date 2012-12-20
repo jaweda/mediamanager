@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 public class EpisodeNameParser {
 
-    public static final ImmutableSet<String> EPISODE_QUALITIES = ImmutableSet.of("720p", "1080p", "1080i", "dvdrip", "hdtv", "ws.pdtv", "pdtv", "ws.dsr", "dsr");
+    public static final ImmutableSet<String> EPISODE_QUALITIES = ImmutableSet.of("720p", "1080p", "1080i", "bdrip", "dvdrip", "hdtv", "ws.pdtv", "pdtv", "ws.dsr", "dsr");
 
     private static final Pattern TITLE_WHITESPACE_REPLACEMENT_REGEX = Pattern.compile("\\W", Pattern.CASE_INSENSITIVE);
 	private static final Pattern EPISODE_QUALITY_REGEX = Pattern.compile("(" + StringUtils.join(EPISODE_QUALITIES, "|").replaceAll("\\.", "\\.") + ")", Pattern.CASE_INSENSITIVE);

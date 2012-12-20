@@ -10,6 +10,7 @@ import com.jamierf.mediamanager.handler.MediaRarFileHandler;
 import com.jamierf.mediamanager.healthchecks.DatabaseHealthCheck;
 import com.jamierf.mediamanager.healthchecks.ParserHealthcheck;
 import com.jamierf.mediamanager.io.InsecureHttpClientFactory;
+import com.jamierf.mediamanager.io.StaticAssetForwarder;
 import com.jamierf.mediamanager.listeners.CalendarItemListener;
 import com.jamierf.mediamanager.listeners.DownloadableItemListener;
 import com.jamierf.mediamanager.listeners.DownloadableItemListenerProxy;
@@ -26,7 +27,6 @@ import com.jamierf.mediamanager.parsing.rss.parsers.RSSParser;
 import com.jamierf.mediamanager.parsing.search.SearchItem;
 import com.jamierf.mediamanager.parsing.search.SearchParser;
 import com.jamierf.mediamanager.resources.BackfillResource;
-import com.jamierf.mediamanager.io.StaticAssetForwarder;
 import com.jamierf.mediamanager.resources.MediaManagerResource;
 import com.jamierf.mediamanager.resources.ShowsResource;
 import com.yammer.dropwizard.Service;
@@ -86,8 +86,8 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         return calendarFeed;
     }
 
-    private static Downloader buildTorrentFileManager(FileConfiguration config, HttpClientFactory clientFactory) {
-        return new WatchDirDownloader(clientFactory, config);
+    private static Downloader buildTorrentFileManager(TorrentConfiguration config, HttpClientFactory clientFactory) {
+        return new WatchDirDownloader(clientFactory, config.getWatchDir());
     }
 
     private static FeedManager<RSSItem> buildTorrentFeedManager(TorrentConfiguration config, ItemListener<DownloadableItem> downloadableItemListener, HttpClientFactory clientFactory) throws ClassNotFoundException {
@@ -132,7 +132,7 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         env.manage(shows);
 
         // Initialise the torrent file manager - this is responsible for taking a torrent file URL and downloading the torrent contents
-        final Downloader torrentFileManager = MediaManager.buildTorrentFileManager(config.getFileConfiguration(), clientFactory);
+        final Downloader torrentFileManager = MediaManager.buildTorrentFileManager(config.getTorrentConfiguration(), clientFactory);
         env.manage(torrentFileManager);
 
         // Initialise the downloadable item listener - this listens for downloadable items and passes them to the torrent file manager

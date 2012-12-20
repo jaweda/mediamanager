@@ -84,7 +84,7 @@ public class FeedManager<T extends FeedItem> implements Managed, Runnable, Parsi
                 }
                 catch (Exception e) {
                     if (LOG.isDebugEnabled())
-                        LOG.debug(e, "Caught exception while parsing feed");
+                        LOG.debug(e, "Caught exception while parsing feed {}", parser.getUrl());
 
                     exceptions.add(e);
                 }
