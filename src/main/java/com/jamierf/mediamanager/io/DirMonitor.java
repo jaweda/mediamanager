@@ -44,7 +44,7 @@ public class DirMonitor {
 		root = file.toPath();
 		watcher = root.getFileSystem().newWatchService();
 
-		oldFiles = Sets.newHashSet();
+		oldFiles = Sets.newHashSet(root.toFile());
 		running = new AtomicBoolean(false);
 		listeners = Lists.newLinkedList();
 
