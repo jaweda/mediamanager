@@ -44,6 +44,14 @@ public class DownloadDirManager implements FileListener, Managed {
 
 	public DownloadDirManager(FileConfiguration config) throws IOException {
         final File destinationDir = config.getDestinationDir();
+        final File watchDir = config.getWatchDir();
+
+        if (!watchDir.exists()) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("File watch directory '{}' doesn't exist, creating", watchDir);
+
+            watchDir.mkdirs();
+        }
 
         if (!destinationDir.exists()) {
             if (LOG.isDebugEnabled())
@@ -52,7 +60,7 @@ public class DownloadDirManager implements FileListener, Managed {
             destinationDir.mkdirs();
         }
 
-		monitor = new DirMonitor(config.getWatchDir());
+		monitor = new DirMonitor(watchDir);
 		monitor.addListener(this);
 
 		fileHandlers = Maps.newHashMap();
