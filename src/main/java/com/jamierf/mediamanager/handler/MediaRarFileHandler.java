@@ -1,30 +1,24 @@
 package com.jamierf.mediamanager.handler;
 
-import com.jamierf.mediamanager.managers.DownloadDirManager;
-
 import java.io.File;
-import java.util.regex.Pattern;
 
 public class MediaRarFileHandler extends RarFileHandler {
-
-    private static final Pattern FILENAME_BLACKLIST_REGEX = Pattern.compile("(sample)", Pattern.CASE_INSENSITIVE);
 
     public MediaRarFileHandler(File destDir, boolean overwrite, boolean delete) {
         super(destDir, overwrite, delete);
     }
 
     @Override
-    protected boolean acceptFile(String path) {
-        // Check it's a media file type
-        final String extension = DownloadDirManager.getFileExtension(path);
-        if (!MediaFileHandler.EXTENSIONS.contains(extension))
+    protected boolean acceptContainedFile(String path) {
+        // Check our parent class will accept the file
+        if (!super.acceptContainedFile(path))
             return false;
 
-        // Check its name doesn't match the blacklist
-        if (FILENAME_BLACKLIST_REGEX.matcher(path).matches())
+        // Check the Media file handler will accept the file
+        if (!MediaFileHandler.acceptFile(path))
             return false;
 
-        return super.acceptFile(path);
+        return true;
     }
 
     @Override

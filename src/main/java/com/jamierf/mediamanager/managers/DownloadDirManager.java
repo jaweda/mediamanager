@@ -20,6 +20,14 @@ public class DownloadDirManager implements FileListener, Managed {
 
 	private static final Log LOG = Log.forClass(DownloadDirManager.class);
 
+    public static String getFileName(String name) {
+        final int delim = name.lastIndexOf('.');
+        if (delim < 0)
+            return name;
+
+        return name.substring(0, delim);
+    }
+
     public static String getFileExtension(String name) {
         final int delim = name.lastIndexOf('.');
         if (delim < 0)
@@ -43,11 +51,11 @@ public class DownloadDirManager implements FileListener, Managed {
             destinationDir.mkdirs();
         }
 
-		monitor = new DirMonitor(destinationDir);
+		monitor = new DirMonitor(config.getWatchDir());
 		monitor.addListener(this);
 
 		fileHandlers = Maps.newHashMap();
-		pathTrimLength = destinationDir.getAbsolutePath().length();
+		pathTrimLength = config.getWatchDir().getAbsolutePath().length();
 
         defaultHandler = null;
 	}
