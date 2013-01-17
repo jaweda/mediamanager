@@ -5,9 +5,7 @@ import com.jamierf.mediamanager.db.BDBShowDatabase;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.downloader.Downloader;
 import com.jamierf.mediamanager.downloader.WatchDirDownloader;
-import com.jamierf.mediamanager.handler.GarbageFileHandler;
-import com.jamierf.mediamanager.handler.MediaFileHandler;
-import com.jamierf.mediamanager.handler.MediaRarFileHandler;
+import com.jamierf.mediamanager.handler.*;
 import com.jamierf.mediamanager.healthchecks.DatabaseHealthCheck;
 import com.jamierf.mediamanager.healthchecks.ParserHealthcheck;
 import com.jamierf.mediamanager.io.StaticAssetForwarder;
@@ -114,7 +112,11 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
 
         downloadDirManager.addFileTypeHandler(new MediaRarFileHandler(config.getDestinationDir(), config.isOverwriteFiles(), config.isDeleteArchives()));
         downloadDirManager.addFileTypeHandler(new MediaFileHandler(config.getDestinationDir(), config.isMoveFiles(), config.isOverwriteFiles()));
-        downloadDirManager.addFileTypeHandler(new GarbageFileHandler());
+
+        // Handle garbage files!
+        final GarbageFileHandler garbageHandler = new GarbageFileHandler();
+        downloadDirManager.addFileTypeHandler(garbageHandler);
+        downloadDirManager.setDirectoryHandler(garbageHandler);
 
         return downloadDirManager;
     }

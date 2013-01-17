@@ -7,6 +7,8 @@ import com.jamierf.mediamanager.models.State;
 import com.jamierf.mediamanager.parsing.DownloadableItem;
 import com.jamierf.mediamanager.parsing.EpisodeNameParser;
 import com.jamierf.mediamanager.parsing.ItemListener;
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.yammer.dropwizard.logging.Log;
 
 import java.io.IOException;
@@ -80,8 +82,11 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
             // Download the torrent file
             torrentDownloader.download(item.getLink());
         }
-        catch (IOException e) {
+        catch (Exception e) {
             LOG.error(e, "Failed to download torrent");
+
+            // Return so we don't mark this as pending since we failed to download it
+            return;
         }
 
         try {

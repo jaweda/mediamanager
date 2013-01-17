@@ -39,6 +39,7 @@ public class DownloadDirManager implements FileListener, Managed {
 	private final DirMonitor monitor;
 	private final Map<String, FileTypeHandler> fileHandlers;
 	private final int pathTrimLength;
+    private FileHandler directoryHandler;
     private FileHandler defaultHandler;
 
 	public DownloadDirManager(FileConfiguration config) throws IOException {
@@ -57,6 +58,7 @@ public class DownloadDirManager implements FileListener, Managed {
 		fileHandlers = Maps.newHashMap();
 		pathTrimLength = config.getWatchDir().getAbsolutePath().length();
 
+        directoryHandler = null;
         defaultHandler = null;
 	}
 
@@ -64,6 +66,10 @@ public class DownloadDirManager implements FileListener, Managed {
 		for (String ext : handler.getHandledExtensions())
 			fileHandlers.put(ext.toLowerCase(), handler);
 	}
+
+    public void setDirectoryHandler(FileHandler directoryHandler) {
+        this.directoryHandler = directoryHandler;
+    }
 
     public void setDefaultFileHandler(FileHandler defaultHandler) {
         this.defaultHandler = defaultHandler;
@@ -79,12 +85,19 @@ public class DownloadDirManager implements FileListener, Managed {
 		monitor.stop();
 	}
 
-    private FileHandler getFileHandler(String path) {
-        final String extension = DownloadDirManager.getFileExtension(path);
+    private FileHandler getFileHandler(String path, File file) {
+        if (file.isDirectory()) {
+            // If we have a directory handler, use that
+            if (directoryHandler != null)
+                return directoryHandler;
+        }
+        else {
+            final String extension = DownloadDirManager.getFileExtension(path);
 
-        // If we have a handler for this extension, use that
-        if (fileHandlers.containsKey(extension))
-            return fileHandlers.get(extension);
+            // If we have a handler for this extension, use that
+            if (fileHandlers.containsKey(extension))
+                return fileHandlers.get(extension);
+        }
 
         // Use the default handler
         return defaultHandler;
@@ -95,7 +108,7 @@ public class DownloadDirManager implements FileListener, Managed {
 		final String path = file.getAbsolutePath().substring(pathTrimLength).replaceAll("\\\\", "/"); // trim the start then fix windows style slashes
 
 		try {
-            final FileHandler handler = this.getFileHandler(path);
+            final FileHandler handler = this.getFileHandler(path, file);
             if (handler == null) {
                 if (LOG.isTraceEnabled())
                     LOG.trace("Unhandled file: " + path);

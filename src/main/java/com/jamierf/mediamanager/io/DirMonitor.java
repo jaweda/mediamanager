@@ -97,8 +97,6 @@ public class DirMonitor {
 			final File[] children = file.listFiles();
 			for (File child : children)
 				this.processDirectory(child);
-
-			return;
 		}
 
 		this.processFile(file);
