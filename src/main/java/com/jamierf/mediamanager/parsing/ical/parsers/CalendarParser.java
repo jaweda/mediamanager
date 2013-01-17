@@ -1,6 +1,7 @@
 package com.jamierf.mediamanager.parsing.ical.parsers;
 
 import com.google.common.collect.ImmutableSet;
+import com.jamierf.mediamanager.io.retry.RetryManager;
 import com.jamierf.mediamanager.parsing.FeedParser;
 import com.jamierf.mediamanager.parsing.ical.CalendarItem;
 import com.yammer.dropwizard.client.HttpClientFactory;
@@ -39,8 +40,8 @@ public class CalendarParser extends FeedParser<CalendarItem> {
 
     private final CalendarBuilder builder;
 
-    public CalendarParser(JerseyClient client, String url) {
-        super(client, url, HttpMethod.GET);
+    public CalendarParser(JerseyClient client, RetryManager retryManager, String url) {
+        super(client, retryManager, url, HttpMethod.GET);
 
         builder = new CalendarBuilder();
     }

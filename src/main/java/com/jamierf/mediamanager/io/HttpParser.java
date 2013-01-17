@@ -1,42 +1,22 @@
 package com.jamierf.mediamanager.io;
 
-import com.google.common.collect.Lists;
 import com.jamierf.mediamanager.config.ParserConfiguration;
+import com.jamierf.mediamanager.io.retry.RetryManager;
 import com.sun.jersey.api.client.WebResource;
-import com.yammer.dropwizard.client.HttpClientFactory;
 import com.yammer.dropwizard.client.JerseyClient;
-import com.yammer.dropwizard.client.JerseyClientFactory;
 import com.yammer.dropwizard.logging.Log;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.CookiePolicy;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.cookie.BasicClientCookie;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
 import org.reflections.Reflections;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.net.URI;
-import java.nio.charset.Charset;
-import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 public abstract class HttpParser<T extends ParsedItem> {
 
     private static final Log LOG = Log.forClass(HttpParser.class);
 
-    public static <T extends HttpParser<? extends ParsedItem>> T getInstance(Class<T> base, String name, JerseyClient client, ParserConfiguration config) throws ClassNotFoundException {
+    public static <T extends HttpParser<? extends ParsedItem>> T getInstance(Class<T> base, String name, JerseyClient client, RetryManager retryManager, ParserConfiguration config) throws ClassNotFoundException {
         // Lowercase the requested name
         name = name.toLowerCase();
 
@@ -55,12 +35,12 @@ public abstract class HttpParser<T extends ParsedItem> {
                 continue;
 
             try {
-                final Constructor constructor = clazz.getDeclaredConstructor(JerseyClient.class, ParserConfiguration.class);
+                final Constructor constructor = clazz.getDeclaredConstructor(JerseyClient.class, RetryManager.class, ParserConfiguration.class);
 
                 if (LOG.isInfoEnabled())
                     LOG.info("Creating new parser for {}", parserName);
 
-                return base.cast(constructor.newInstance(client, config));
+                return base.cast(constructor.newInstance(client, retryManager, config));
             }
             catch (NoSuchMethodException e) {
                 LOG.error(e, "Failed to load constructor of {} parser", parserName);
@@ -77,15 +57,17 @@ public abstract class HttpParser<T extends ParsedItem> {
     }
 
     private final JerseyClient client;
+    private final RetryManager retryManager;
     private final URI url;
     private final String method;
 
-    public HttpParser(JerseyClient client, String url, String method) {
-        this (client, URI.create(url), method);
+    public HttpParser(JerseyClient client, RetryManager retryManager, String url, String method) {
+        this (client, retryManager, URI.create(url), method);
     }
 
-    public HttpParser(JerseyClient client, URI url, String method) {
+    public HttpParser(JerseyClient client, RetryManager retryManager, URI url, String method) {
         this.client = client;
+        this.retryManager = retryManager;
         this.url = url;
         this.method = method;
     }
@@ -94,8 +76,13 @@ public abstract class HttpParser<T extends ParsedItem> {
         return client.resource(url);
     }
 
-    protected String fetchContent(WebResource.Builder resource) {
-        return resource.method(method, String.class);
+    protected String fetchContent(final WebResource.Builder resource) {
+        return retryManager.apply(new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                return resource.method(method, String.class);
+            }
+        });
     }
 
     public URI getUrl() {

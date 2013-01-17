@@ -2,6 +2,7 @@ package com.jamierf.mediamanager.parsing.search.parsers;
 
 import com.google.common.collect.ImmutableSet;
 import com.jamierf.mediamanager.config.ParserConfiguration;
+import com.jamierf.mediamanager.io.retry.RetryManager;
 import com.jamierf.mediamanager.parsing.search.SearchItem;
 import com.jamierf.mediamanager.parsing.search.SearchParser;
 import com.sun.jersey.api.client.WebResource;
@@ -32,8 +33,8 @@ public class SCCParser extends SearchParser {
     private final String pass;
     private final String passKey;
 
-    public SCCParser(JerseyClient client, ParserConfiguration config) {
-        super(client, SEARCH_URL, HttpMethod.GET);
+    public SCCParser(JerseyClient client, RetryManager retryManager, ParserConfiguration config) {
+        super(client, retryManager, SEARCH_URL, HttpMethod.GET);
 
         uid = config.getInt("uid");
         pass = config.getString("pass");

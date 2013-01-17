@@ -1,6 +1,7 @@
 package com.jamierf.mediamanager.parsing.rss.parsers;
 
 import com.google.common.collect.ImmutableSet;
+import com.jamierf.mediamanager.io.retry.RetryManager;
 import com.jamierf.mediamanager.parsing.FeedParser;
 import com.jamierf.mediamanager.parsing.ParserException;
 import com.jamierf.mediamanager.parsing.rss.RSSItem;
@@ -51,8 +52,8 @@ public class RSSParser extends FeedParser<RSSItem> {
 
 	private final SAXReader reader;
 
-	public RSSParser(JerseyClient client, String url) throws ParserException {
-        super (client, url, HttpMethod.GET);
+	public RSSParser(JerseyClient client, RetryManager retryManager, String url) throws ParserException {
+        super (client, retryManager, url, HttpMethod.GET);
 
         this.reader = RSSParser.getSAXReader();
 	}

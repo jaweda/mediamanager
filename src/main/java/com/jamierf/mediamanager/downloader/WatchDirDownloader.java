@@ -2,6 +2,7 @@ package com.jamierf.mediamanager.downloader;
 
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
+import com.jamierf.mediamanager.io.retry.RetryManager;
 import com.yammer.dropwizard.client.JerseyClient;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -20,12 +21,14 @@ import java.util.concurrent.Executors;
 public class WatchDirDownloader implements Downloader {
 
     private final JerseyClient client;
-	private final File watchDir;
+    private final RetryManager retryManager;
+    private final File watchDir;
     private final File tempDir;
     private final ExecutorService workerPool;
 
-	public WatchDirDownloader(JerseyClient client, File watchDir) {
+	public WatchDirDownloader(JerseyClient client, RetryManager retryManager, File watchDir) {
         this.client = client;
+        this.retryManager = retryManager;
         this.watchDir = watchDir;
 
         // Create a temp dir for storing the torrent files until they are ready to be moved
@@ -48,6 +51,15 @@ public class WatchDirDownloader implements Downloader {
 
     }
 
+    private InputStream openStream(final URI link) {
+        return retryManager.apply(new Callable<InputStream>() {
+            @Override
+            public InputStream call() throws Exception {
+                return client.resource(link).get(InputStream.class);
+            }
+        });
+    }
+
 	@Override
 	public void download(final URI link) throws IOException {
         final String filename = String.format("%s.torrent", Hashing.sha1().hashString(link.toString()).toString());
@@ -58,7 +70,7 @@ public class WatchDirDownloader implements Downloader {
         workerPool.submit(new Callable<Object>() {
             @Override
             public Object call() throws IOException {
-                final InputStream in = client.resource(link).get(InputStream.class);
+                final InputStream in = openStream(link);
                 final FileOutputStream out = new FileOutputStream(tempFile);
 
                 try {

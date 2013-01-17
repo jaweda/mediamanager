@@ -5,11 +5,14 @@ import com.jamierf.mediamanager.db.BDBShowDatabase;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.downloader.Downloader;
 import com.jamierf.mediamanager.downloader.WatchDirDownloader;
+import com.jamierf.mediamanager.handler.GarbageFileHandler;
 import com.jamierf.mediamanager.handler.MediaFileHandler;
 import com.jamierf.mediamanager.handler.MediaRarFileHandler;
 import com.jamierf.mediamanager.healthchecks.DatabaseHealthCheck;
 import com.jamierf.mediamanager.healthchecks.ParserHealthcheck;
 import com.jamierf.mediamanager.io.StaticAssetForwarder;
+import com.jamierf.mediamanager.io.retry.DelayedJerseyRetryManager;
+import com.jamierf.mediamanager.io.retry.RetryManager;
 import com.jamierf.mediamanager.listeners.CalendarItemListener;
 import com.jamierf.mediamanager.listeners.DownloadableItemListener;
 import com.jamierf.mediamanager.listeners.DownloadableItemListenerProxy;
@@ -52,7 +55,7 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         return new DownloadableItemListener(config.getQualities(), shows, downloader);
     }
 
-    private static BackfillManager buildBackfillManager(TorrentConfiguration config, ShowDatabase shows, ItemListener<DownloadableItem> downloadableItemListener, JerseyClient client) throws ClassNotFoundException {
+    private static BackfillManager buildBackfillManager(TorrentConfiguration config, ShowDatabase shows, ItemListener<DownloadableItem> downloadableItemListener, JerseyClient client, RetryManager retryManager) throws ClassNotFoundException {
         final BackfillManager backfill = new BackfillManager(shows, config.getBackfillDelay());
         backfill.addListener(new DownloadableItemListenerProxy<SearchItem>(downloadableItemListener));
 
@@ -60,7 +63,7 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         final Map<String, ParserConfiguration> searchers = config.getSearchers();
         for (String name : searchers.keySet()) {
             final ParserConfiguration parserConfig = searchers.get(name);
-            final SearchParser parser = SearchParser.getInstance(SearchParser.class, name, client, parserConfig);
+            final SearchParser parser = SearchParser.getInstance(SearchParser.class, name, client, retryManager, parserConfig);
 
             backfill.addParser(parser);
         }
@@ -68,7 +71,7 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         return backfill;
     }
 
-    private static FeedManager<CalendarItem> buildCalendarFeedManager(CalendarConfiguration config, ShowDatabase shows, BackfillManager backfillManager, JerseyClient client) throws ClassNotFoundException {
+    private static FeedManager<CalendarItem> buildCalendarFeedManager(CalendarConfiguration config, ShowDatabase shows, BackfillManager backfillManager, JerseyClient client, RetryManager retryManager) throws ClassNotFoundException {
         final FeedManager<CalendarItem> calendarFeed = new FeedManager<CalendarItem>(config.getUpdateDelay());
         final CalendarItemListener calendarListener = new CalendarItemListener(shows, backfillManager, config.getBeforeAirDuration(), config.getAfterAirDuration());
 
@@ -78,7 +81,7 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         final Map<String, ParserConfiguration> icalParsers = config.getParsers();
         for (String name : icalParsers.keySet()) {
             final ParserConfiguration parserConfig = icalParsers.get(name);
-            final CalendarParser parser = FeedParser.getInstance(CalendarParser.class, name, client, parserConfig);
+            final CalendarParser parser = FeedParser.getInstance(CalendarParser.class, name, client, retryManager, parserConfig);
 
             calendarFeed.addParser(parser);
         }
@@ -86,11 +89,11 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         return calendarFeed;
     }
 
-    private static Downloader buildTorrentFileManager(TorrentConfiguration config, JerseyClient client) {
-        return new WatchDirDownloader(client, config.getWatchDir());
+    private static Downloader buildTorrentFileManager(TorrentConfiguration config, JerseyClient client, RetryManager retryManager) {
+        return new WatchDirDownloader(client, retryManager, config.getWatchDir());
     }
 
-    private static FeedManager<RSSItem> buildTorrentFeedManager(TorrentConfiguration config, ItemListener<DownloadableItem> downloadableItemListener, JerseyClient client) throws ClassNotFoundException {
+    private static FeedManager<RSSItem> buildTorrentFeedManager(TorrentConfiguration config, ItemListener<DownloadableItem> downloadableItemListener, JerseyClient client, RetryManager retryManager) throws ClassNotFoundException {
         final FeedManager<RSSItem> torrentFeed = new FeedManager<RSSItem>(config.getUpdateDelay());
         torrentFeed.addListener(new DownloadableItemListenerProxy<RSSItem>(downloadableItemListener));
 
@@ -98,7 +101,7 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         final Map<String, ParserConfiguration> feeders = config.getFeeders();
         for (String name : feeders.keySet()) {
             final ParserConfiguration parserConfig = feeders.get(name);
-            final RSSParser parser = FeedParser.getInstance(RSSParser.class, name, client, parserConfig);
+            final RSSParser parser = FeedParser.getInstance(RSSParser.class, name, client, retryManager, parserConfig);
 
             torrentFeed.addParser(parser);
         }
@@ -111,6 +114,7 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
 
         downloadDirManager.addFileTypeHandler(new MediaRarFileHandler(config.getDestinationDir(), config.isOverwriteFiles(), config.isDeleteArchives()));
         downloadDirManager.addFileTypeHandler(new MediaFileHandler(config.getDestinationDir(), config.isMoveFiles(), config.isOverwriteFiles()));
+        downloadDirManager.addFileTypeHandler(new GarbageFileHandler());
 
         return downloadDirManager;
     }
@@ -126,28 +130,29 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
     @Override
     protected void initialize(MediaManagerConfiguration config, Environment env) throws Exception {
         final JerseyClientFactory clientFactory = new JerseyClientFactory(config.getHttpClientConfiguration());
+        final RetryManager retryManager = new DelayedJerseyRetryManager(MediaManager.class, config.getRetryConfiguration());
 
         // Initialise the shows database - this stores what episodes we should be watching for
         final ShowDatabase shows = MediaManager.buildShowDatabase(config.getDatabaseConfiguration());
         env.manage(shows);
 
         // Initialise the torrent file manager - this is responsible for taking a torrent file URL and downloading the torrent contents
-        final Downloader torrentFileManager = MediaManager.buildTorrentFileManager(config.getTorrentConfiguration(), clientFactory.build(env));
+        final Downloader torrentFileManager = MediaManager.buildTorrentFileManager(config.getTorrentConfiguration(), clientFactory.build(env), retryManager);
         env.manage(torrentFileManager);
 
         // Initialise the downloadable item listener - this listens for downloadable items and passes them to the torrent file manager
         final ItemListener<DownloadableItem> downloadableListener = MediaManager.buildDownloadableListener(config.getTorrentConfiguration(), shows, torrentFileManager);
 
         // Initialise the backfill manager - this searches for missing episodes on demand
-        final BackfillManager backfillManager = MediaManager.buildBackfillManager(config.getTorrentConfiguration(), shows, downloadableListener, clientFactory.build(env));
+        final BackfillManager backfillManager = MediaManager.buildBackfillManager(config.getTorrentConfiguration(), shows, downloadableListener, clientFactory.build(env), retryManager);
         env.manage(backfillManager);
 
         // Initialise the calendar feed manager - this periodically parses the known calendar feeds to look for new episodes we want to watch for
-        final FeedManager<CalendarItem> calendarFeedManager = MediaManager.buildCalendarFeedManager(config.getCalendarConfiguration(), shows, backfillManager, clientFactory.build(env));
+        final FeedManager<CalendarItem> calendarFeedManager = MediaManager.buildCalendarFeedManager(config.getCalendarConfiguration(), shows, backfillManager, clientFactory.build(env), retryManager);
         env.manage(calendarFeedManager);
 
         // Initialise the torrent feed manager - this periodically parses the known torrent RSS feeds to look for new episodes we are watching for
-        final FeedManager<RSSItem> torrentFeedManager = MediaManager.buildTorrentFeedManager(config.getTorrentConfiguration(), downloadableListener, clientFactory.build(env));
+        final FeedManager<RSSItem> torrentFeedManager = MediaManager.buildTorrentFeedManager(config.getTorrentConfiguration(), downloadableListener, clientFactory.build(env), retryManager);
         env.manage(torrentFeedManager);
 
         // Initialise the download dir manager - this listens for new files in the download directory and moves the wanted ones to a specified directory

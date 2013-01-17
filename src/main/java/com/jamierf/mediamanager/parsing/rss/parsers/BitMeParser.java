@@ -1,6 +1,7 @@
 package com.jamierf.mediamanager.parsing.rss.parsers;
 
 import com.jamierf.mediamanager.config.ParserConfiguration;
+import com.jamierf.mediamanager.io.retry.RetryManager;
 import com.jamierf.mediamanager.parsing.ParserException;
 import com.yammer.dropwizard.client.JerseyClient;
 
@@ -15,8 +16,8 @@ public class BitMeParser extends RSSParser {
 
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
 
-	public BitMeParser(JerseyClient client, ParserConfiguration config) throws ParserException, MalformedURLException {
-		super (client, String.format(FEED_URL, config.getString("passKey")));
+	public BitMeParser(JerseyClient client, RetryManager retryManager, ParserConfiguration config) throws ParserException, MalformedURLException {
+		super (client, retryManager, String.format(FEED_URL, config.getString("passKey")));
 	}
 
 	@Override

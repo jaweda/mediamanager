@@ -1,6 +1,7 @@
 package com.jamierf.mediamanager.parsing;
 
 import com.jamierf.mediamanager.io.HttpParser;
+import com.jamierf.mediamanager.io.retry.RetryManager;
 import com.sun.jersey.api.client.WebResource;
 import com.yammer.dropwizard.client.HttpClientFactory;
 import com.yammer.dropwizard.client.JerseyClient;
@@ -16,8 +17,8 @@ public abstract class FeedParser<T extends FeedItem> extends HttpParser<T> {
 
     private static final Log LOG = Log.forClass(FeedParser.class);
 
-    public FeedParser(JerseyClient client, String url, String method) {
-        super(client, url, method);
+    public FeedParser(JerseyClient client, RetryManager retryManager, String url, String method) {
+        super(client, retryManager, url, method);
     }
 
     public Set<T> parse() throws Exception {

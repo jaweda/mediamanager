@@ -1,6 +1,7 @@
 package com.jamierf.mediamanager.parsing.rss.parsers;
 
 import com.jamierf.mediamanager.config.ParserConfiguration;
+import com.jamierf.mediamanager.io.retry.RetryManager;
 import com.jamierf.mediamanager.parsing.ParserException;
 import com.jamierf.mediamanager.parsing.rss.RSSItem;
 import com.yammer.dropwizard.client.HttpClientFactory;
@@ -16,8 +17,8 @@ public class TCParser extends RSSParser {
 
 	private static final String FEED_URL = "http://tehconnection.eu/feeds.php?feed=torrents_all&user=%d&auth=%s&passkey=%s&authkey=%s";
 
-	public TCParser(JerseyClient client, ParserConfiguration config) throws MalformedURLException, ParserException {
-		super (client, String.format(FEED_URL, config.getInt("userId"), config.getString("authId"), config.getString("passKey"), config.getString("authKey")));
+	public TCParser(JerseyClient client, RetryManager retryManager, ParserConfiguration config) throws MalformedURLException, ParserException {
+		super (client, retryManager, String.format(FEED_URL, config.getInt("userId"), config.getString("authId"), config.getString("passKey"), config.getString("authKey")));
 	}
 
 	@Override
