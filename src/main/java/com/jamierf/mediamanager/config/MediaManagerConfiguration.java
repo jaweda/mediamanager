@@ -10,7 +10,7 @@ public class MediaManagerConfiguration extends Configuration {
     private JerseyClientConfiguration httpClient = new JerseyClientConfiguration();
 
     @JsonProperty
-    private RetryConfiguration retry = new RetryConfiguration();
+    private RetryConfiguration retryManager = new RetryConfiguration();
 
     @JsonProperty
     private DatabaseConfiguration database = new DatabaseConfiguration();
@@ -29,7 +29,7 @@ public class MediaManagerConfiguration extends Configuration {
     }
 
     public RetryConfiguration getRetryConfiguration() {
-        return retry;
+        return retryManager;
     }
 
     public DatabaseConfiguration getDatabaseConfiguration() {
