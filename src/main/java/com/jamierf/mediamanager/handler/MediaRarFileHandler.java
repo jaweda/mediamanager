@@ -12,8 +12,8 @@ public class MediaRarFileHandler extends RarFileHandler {
 
     private final MediaFileListener listener;
 
-    public MediaRarFileHandler(File destDir, boolean overwrite, boolean delete, MediaFileListener listener) {
-        super(destDir, overwrite, delete);
+    public MediaRarFileHandler(File destDir, boolean delete, MediaFileListener listener) {
+        super(destDir, delete);
 
         this.listener = listener;
     }

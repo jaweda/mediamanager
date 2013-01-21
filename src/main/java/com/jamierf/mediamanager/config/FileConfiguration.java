@@ -16,13 +16,7 @@ public class FileConfiguration {
     private File destinationDir;
 
     @JsonProperty
-    private boolean overwriteFiles = false;
-
-    @JsonProperty
-    private boolean moveFiles = true;
-
-    @JsonProperty
-    private boolean deleteArchives = true;
+    private boolean deleteOriginals = true;
 
     public File getWatchDir() {
         return watchDir;
@@ -32,15 +26,7 @@ public class FileConfiguration {
         return destinationDir;
     }
 
-    public boolean isOverwriteFiles() {
-        return overwriteFiles;
-    }
-
-    public boolean isMoveFiles() {
-        return moveFiles;
-    }
-
-    public boolean isDeleteArchives() {
-        return deleteArchives;
+    public boolean isDeleteOriginals() {
+        return deleteOriginals;
     }
 }

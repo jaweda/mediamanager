@@ -25,13 +25,11 @@ public class MediaFileHandler implements FileTypeHandler {
 
     private final File destDir;
     private final boolean move;
-	private final boolean overwrite;
     private final MediaFileListener listener;
 
-    public MediaFileHandler(File destDir, boolean move, boolean overwrite, MediaFileListener listener) {
+    public MediaFileHandler(File destDir, boolean move, MediaFileListener listener) {
         this.destDir = destDir;
         this.move = move;
-		this.overwrite = overwrite;
         this.listener = listener;
 
         if (!destDir.exists())
@@ -57,7 +55,7 @@ public class MediaFileHandler implements FileTypeHandler {
         }
 
 		final File destFile = new File(destDir, file.getName());
-		if (!overwrite && destFile.exists())
+		if (destFile.exists())
 			throw new IOException("Skipping already existing media file: " + file.getName());
 
 		// Make the parent directory if required

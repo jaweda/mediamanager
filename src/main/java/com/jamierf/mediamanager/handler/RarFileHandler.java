@@ -23,12 +23,10 @@ public class RarFileHandler implements FileTypeHandler {
 	private static final Log LOG = Log.forClass(RarFileHandler.class);
 
     protected final File destDir;
-    protected final boolean overwrite;
     protected final boolean delete;
 
-    public RarFileHandler(File destDir, boolean overwrite, boolean delete) {
+    public RarFileHandler(File destDir, boolean delete) {
         this.destDir = destDir;
-		this.overwrite = overwrite;
         this.delete = delete;
 
         if (!destDir.exists())
@@ -74,7 +72,7 @@ public class RarFileHandler implements FileTypeHandler {
 
                 final String path = PATH_NORMALISATION_REGEX.matcher(fileHeader.getFileNameString()).replaceAll(File.separator);
                 final File destFile = this.getDestinationFile(path);
-				if (!overwrite && destFile.exists())
+				if (destFile.exists()) // Skip any existing files
 					continue;
 
 				if (LOG.isTraceEnabled())

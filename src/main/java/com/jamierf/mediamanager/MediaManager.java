@@ -18,9 +18,7 @@ import com.jamierf.mediamanager.listeners.MediaFileListener;
 import com.jamierf.mediamanager.managers.BackfillManager;
 import com.jamierf.mediamanager.managers.DownloadDirManager;
 import com.jamierf.mediamanager.managers.FeedManager;
-import com.jamierf.mediamanager.parsing.DownloadableItem;
 import com.jamierf.mediamanager.parsing.FeedParser;
-import com.jamierf.mediamanager.parsing.ItemListener;
 import com.jamierf.mediamanager.parsing.ical.CalendarItem;
 import com.jamierf.mediamanager.parsing.ical.parsers.CalendarParser;
 import com.jamierf.mediamanager.parsing.rss.RSSItem;
@@ -37,7 +35,6 @@ import com.yammer.dropwizard.client.JerseyClientFactory;
 import com.yammer.dropwizard.config.Environment;
 import com.yammer.dropwizard.views.ViewBundle;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -116,13 +113,15 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
     private static DownloadDirManager buildDownloadDirManager(FileConfiguration config, MediaFileListener mediaListener) throws IOException {
         final DownloadDirManager downloadDirManager = new DownloadDirManager(config);
 
-        downloadDirManager.addFileTypeHandler(new MediaRarFileHandler(config.getDestinationDir(), config.isOverwriteFiles(), config.isDeleteArchives(), mediaListener));
-        downloadDirManager.addFileTypeHandler(new MediaFileHandler(config.getDestinationDir(), config.isMoveFiles(), config.isOverwriteFiles(), mediaListener));
+        downloadDirManager.addFileTypeHandler(new MediaRarFileHandler(config.getDestinationDir(), config.isDeleteOriginals(), mediaListener));
+        downloadDirManager.addFileTypeHandler(new MediaFileHandler(config.getDestinationDir(), config.isDeleteOriginals(), mediaListener));
 
-        // Handle garbage files!
-        final GarbageFileHandler garbageHandler = new GarbageFileHandler();
-        downloadDirManager.addFileTypeHandler(garbageHandler);
-        downloadDirManager.setDirectoryHandler(garbageHandler);
+        // Handle garbage files (only if we want to delete originals)!
+        if (config.isDeleteOriginals()) {
+            final GarbageFileHandler garbageHandler = new GarbageFileHandler();
+            downloadDirManager.addFileTypeHandler(garbageHandler);
+            downloadDirManager.setDirectoryHandler(garbageHandler);
+        }
 
         return downloadDirManager;
     }
