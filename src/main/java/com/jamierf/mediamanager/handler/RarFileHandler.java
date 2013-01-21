@@ -7,7 +7,10 @@ import de.innosystec.unrar.Archive;
 import de.innosystec.unrar.exception.RarException;
 import de.innosystec.unrar.rarfile.FileHeader;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -45,6 +48,18 @@ public class RarFileHandler implements FileTypeHandler {
         return new File(destDir.getAbsolutePath() + File.separator + path);
     }
 
+    protected boolean extractFile(Archive archive, FileHeader fileHeader, File destFile) throws IOException, RarException {
+        final OutputStream out = new FileOutputStream(destFile);
+
+        try {
+            archive.extractFile(fileHeader, out);
+            return true;
+        }
+        finally {
+            out.close();
+        }
+    }
+
 	@Override
 	public void handleFile(String relativePath, File file) throws IOException {
 		try {
@@ -70,15 +85,8 @@ public class RarFileHandler implements FileTypeHandler {
 				if (!destDir.exists())
 					destDir.mkdirs();
 
-				final OutputStream out = new FileOutputStream(destFile);
-
-				try {
-					archive.extractFile(fileHeader, out);
-					handled++;
-				}
-				finally {
-					out.close();
-				}
+                if (this.extractFile(archive, fileHeader, destFile))
+                    handled++;
 			}
 
 			if (handled < 1)

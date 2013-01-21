@@ -1,11 +1,21 @@
 package com.jamierf.mediamanager.handler;
 
+import com.jamierf.mediamanager.listeners.MediaFileListener;
+import de.innosystec.unrar.Archive;
+import de.innosystec.unrar.exception.RarException;
+import de.innosystec.unrar.rarfile.FileHeader;
+
 import java.io.File;
+import java.io.IOException;
 
 public class MediaRarFileHandler extends RarFileHandler {
 
-    public MediaRarFileHandler(File destDir, boolean overwrite, boolean delete) {
+    private final MediaFileListener listener;
+
+    public MediaRarFileHandler(File destDir, boolean overwrite, boolean delete, MediaFileListener listener) {
         super(destDir, overwrite, delete);
+
+        this.listener = listener;
     }
 
     @Override
@@ -28,5 +38,14 @@ public class MediaRarFileHandler extends RarFileHandler {
             path = path.substring(path.lastIndexOf(File.separator) + 1);
 
         return super.getDestinationFile(path);
+    }
+
+    @Override
+    protected boolean extractFile(Archive archive, FileHeader fileHeader, File destFile) throws IOException, RarException {
+        final boolean success = super.extractFile(archive, fileHeader, destFile);
+        if (success)
+            listener.onNewItem(destFile);
+
+        return success;
     }
 }

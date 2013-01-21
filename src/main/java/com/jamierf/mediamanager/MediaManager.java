@@ -14,6 +14,7 @@ import com.jamierf.mediamanager.io.retry.RetryManager;
 import com.jamierf.mediamanager.listeners.CalendarItemListener;
 import com.jamierf.mediamanager.listeners.DownloadableItemListener;
 import com.jamierf.mediamanager.listeners.DownloadableItemListenerProxy;
+import com.jamierf.mediamanager.listeners.MediaFileListener;
 import com.jamierf.mediamanager.managers.BackfillManager;
 import com.jamierf.mediamanager.managers.DownloadDirManager;
 import com.jamierf.mediamanager.managers.FeedManager;
@@ -36,6 +37,7 @@ import com.yammer.dropwizard.client.JerseyClientFactory;
 import com.yammer.dropwizard.config.Environment;
 import com.yammer.dropwizard.views.ViewBundle;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -53,7 +55,11 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         return new DownloadableItemListener(config.getQualities(), shows, downloader);
     }
 
-    private static BackfillManager buildBackfillManager(TorrentConfiguration config, ShowDatabase shows, ItemListener<DownloadableItem> downloadableItemListener, JerseyClient client, RetryManager retryManager) throws ClassNotFoundException {
+    private static MediaFileListener buildMediaListener(ShowDatabase shows) {
+        return new MediaFileListener(shows);
+    }
+
+    private static BackfillManager buildBackfillManager(TorrentConfiguration config, ShowDatabase shows, DownloadableItemListener downloadableItemListener, JerseyClient client, RetryManager retryManager) throws ClassNotFoundException {
         final BackfillManager backfill = new BackfillManager(shows, config.getBackfillDelay());
         backfill.addListener(new DownloadableItemListenerProxy<SearchItem>(downloadableItemListener));
 
@@ -91,7 +97,7 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         return new WatchDirDownloader(client, retryManager, config.getWatchDir());
     }
 
-    private static FeedManager<RSSItem> buildTorrentFeedManager(TorrentConfiguration config, ItemListener<DownloadableItem> downloadableItemListener, JerseyClient client, RetryManager retryManager) throws ClassNotFoundException {
+    private static FeedManager<RSSItem> buildTorrentFeedManager(TorrentConfiguration config, DownloadableItemListener downloadableItemListener, JerseyClient client, RetryManager retryManager) throws ClassNotFoundException {
         final FeedManager<RSSItem> torrentFeed = new FeedManager<RSSItem>(config.getUpdateDelay());
         torrentFeed.addListener(new DownloadableItemListenerProxy<RSSItem>(downloadableItemListener));
 
@@ -107,11 +113,11 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         return torrentFeed;
     }
 
-    private static DownloadDirManager buildDownloadDirManager(FileConfiguration config) throws IOException {
+    private static DownloadDirManager buildDownloadDirManager(FileConfiguration config, MediaFileListener mediaListener) throws IOException {
         final DownloadDirManager downloadDirManager = new DownloadDirManager(config);
 
-        downloadDirManager.addFileTypeHandler(new MediaRarFileHandler(config.getDestinationDir(), config.isOverwriteFiles(), config.isDeleteArchives()));
-        downloadDirManager.addFileTypeHandler(new MediaFileHandler(config.getDestinationDir(), config.isMoveFiles(), config.isOverwriteFiles()));
+        downloadDirManager.addFileTypeHandler(new MediaRarFileHandler(config.getDestinationDir(), config.isOverwriteFiles(), config.isDeleteArchives(), mediaListener));
+        downloadDirManager.addFileTypeHandler(new MediaFileHandler(config.getDestinationDir(), config.isMoveFiles(), config.isOverwriteFiles(), mediaListener));
 
         // Handle garbage files!
         final GarbageFileHandler garbageHandler = new GarbageFileHandler();
@@ -143,7 +149,10 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         env.manage(torrentFileManager);
 
         // Initialise the downloadable item listener - this listens for downloadable items and passes them to the torrent file manager
-        final ItemListener<DownloadableItem> downloadableListener = MediaManager.buildDownloadableListener(config.getTorrentConfiguration(), shows, torrentFileManager);
+        final DownloadableItemListener downloadableListener = MediaManager.buildDownloadableListener(config.getTorrentConfiguration(), shows, torrentFileManager);
+
+        // Initialise the media item listener - this listens for downloaded items and marks them as such in the database
+        final MediaFileListener mediaListener = MediaManager.buildMediaListener(shows);
 
         // Initialise the backfill manager - this searches for missing episodes on demand
         final BackfillManager backfillManager = MediaManager.buildBackfillManager(config.getTorrentConfiguration(), shows, downloadableListener, clientFactory.build(env), retryManager);
@@ -158,7 +167,7 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         env.manage(torrentFeedManager);
 
         // Initialise the download dir manager - this listens for new files in the download directory and moves the wanted ones to a specified directory
-		final DownloadDirManager downloadDirManager = MediaManager.buildDownloadDirManager(config.getFileConfiguration());
+		final DownloadDirManager downloadDirManager = MediaManager.buildDownloadDirManager(config.getFileConfiguration(), mediaListener);
         env.manage(downloadDirManager);
 
         // Add a filter to redirect favicon to the static assets directory

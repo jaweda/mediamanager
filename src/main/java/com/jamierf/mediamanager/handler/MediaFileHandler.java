@@ -2,6 +2,7 @@ package com.jamierf.mediamanager.handler;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
+import com.jamierf.mediamanager.listeners.MediaFileListener;
 import com.jamierf.mediamanager.managers.DownloadDirManager;
 import com.yammer.dropwizard.logging.Log;
 
@@ -25,11 +26,13 @@ public class MediaFileHandler implements FileTypeHandler {
     private final File destDir;
     private final boolean move;
 	private final boolean overwrite;
+    private final MediaFileListener listener;
 
-	public MediaFileHandler(File destDir, boolean move, boolean overwrite) {
+    public MediaFileHandler(File destDir, boolean move, boolean overwrite, MediaFileListener listener) {
         this.destDir = destDir;
         this.move = move;
 		this.overwrite = overwrite;
+        this.listener = listener;
 
         if (!destDir.exists())
             destDir.mkdirs();
@@ -74,5 +77,7 @@ public class MediaFileHandler implements FileTypeHandler {
 
             Files.copy(file, destFile);
 		}
+
+        listener.onNewItem(destFile);
 	}
 }

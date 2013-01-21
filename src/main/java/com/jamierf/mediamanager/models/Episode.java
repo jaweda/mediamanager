@@ -120,6 +120,10 @@ public class Episode {
     @JsonProperty
     private final State state;
 
+    public Episode(Name name, State state) {
+        this (name, null, null, state);
+    }
+
     @JsonCreator
     public Episode(
             @JsonProperty("name") Name name,
