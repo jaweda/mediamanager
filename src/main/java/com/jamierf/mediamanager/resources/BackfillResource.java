@@ -52,7 +52,7 @@ public class BackfillResource {
         if (LOG.isInfoEnabled())
             LOG.info("Marking episode {} for backfill", name);
 
-        final Episode episode = new Episode(name, null, null, State.DESIRED);
+        final Episode episode = new Episode(name, State.DESIRED);
         if (!shows.addOrUpdate(episode)) // If already in DB overwrite since we specifically requested
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 

@@ -38,17 +38,9 @@ public class CalendarItemListener implements ItemListener<CalendarItem> {
             return;
         }
 
-        final Calendar notBefore = Calendar.getInstance();
-        notBefore.setTime(item.getEnd());
-        notBefore.add(Calendar.MINUTE, -(int) beforeDuration.toMinutes());
-
-        final Calendar notAfter = Calendar.getInstance();
-        notAfter.setTime(item.getEnd());
-        notAfter.add(Calendar.MINUTE, +(int) afterDuration.toMinutes());
-
         try {
             // Attempt to add the desired episode
-            final Episode episode = new Episode(name, notBefore, notAfter, State.DESIRED);
+            final Episode episode = new Episode(name, State.DESIRED);
             if (!shows.addIfNotExists(episode)) {
                 if (LOG.isTraceEnabled())
                     LOG.trace("Failed to add episode {} to database (already exists?)", episode);

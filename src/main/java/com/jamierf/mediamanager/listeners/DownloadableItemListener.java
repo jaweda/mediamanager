@@ -7,11 +7,8 @@ import com.jamierf.mediamanager.models.State;
 import com.jamierf.mediamanager.parsing.DownloadableItem;
 import com.jamierf.mediamanager.parsing.EpisodeNameParser;
 import com.jamierf.mediamanager.parsing.ItemListener;
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.UniformInterfaceException;
 import com.yammer.dropwizard.logging.Log;
 
-import java.io.IOException;
 import java.util.Set;
 
 public class DownloadableItemListener implements ItemListener<DownloadableItem> {
@@ -58,7 +55,7 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
 
         // Check if it is a desired episode
         final Episode episode = this.getEpisode(name);
-        if (episode == null || !episode.isDesiredNow()) {
+        if (episode == null || !episode.isDesired()) {
             if (LOG.isTraceEnabled())
                 LOG.trace("Skipping {}, not desired", name);
 

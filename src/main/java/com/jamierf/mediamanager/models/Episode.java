@@ -5,7 +5,6 @@ import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import java.util.Calendar;
 import java.util.regex.Pattern;
 
 public class Episode {
@@ -112,32 +111,18 @@ public class Episode {
     private final Name name;
 
     @JsonProperty
-    private final Calendar notBefore;
-
-    @JsonProperty
-    private final Calendar notAfter;
-
-    @JsonProperty
     private final State state;
-
-    public Episode(Name name, State state) {
-        this (name, null, null, state);
-    }
 
     @JsonCreator
     public Episode(
             @JsonProperty("name") Name name,
-            @JsonProperty("notBefore") Calendar notBefore,
-            @JsonProperty("notAfter") Calendar notAfter,
             @JsonProperty("state") State state) {
         this.name = name;
-        this.notBefore = notBefore;
-        this.notAfter = notAfter;
         this.state = state;
     }
 
     public Episode copyWithState(State state) {
-        return new Episode(name, notBefore, notAfter, state);
+        return new Episode(name, state);
     }
 
     public Name getName() {
@@ -149,21 +134,6 @@ public class Episode {
         return state == State.DESIRED;
     }
 
-    @JsonIgnore
-    public boolean isDesiredNow() {
-        if (state != State.DESIRED)
-            return false;
-
-        final Calendar now = Calendar.getInstance();
-        if (notBefore != null && now.before(notBefore))
-            return false;
-
-        if (notAfter != null && now.after(notAfter))
-            return false;
-
-        return true;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -172,8 +142,6 @@ public class Episode {
         Episode episode = (Episode) o;
 
         if (name != null ? !name.equals(episode.name) : episode.name != null) return false;
-        if (notAfter != null ? !notAfter.equals(episode.notAfter) : episode.notAfter != null) return false;
-        if (notBefore != null ? !notBefore.equals(episode.notBefore) : episode.notBefore != null) return false;
         if (state != episode.state) return false;
 
         return true;
@@ -182,8 +150,6 @@ public class Episode {
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (notBefore != null ? notBefore.hashCode() : 0);
-        result = 31 * result + (notAfter != null ? notAfter.hashCode() : 0);
         result = 31 * result + (state != null ? state.hashCode() : 0);
         return result;
     }
