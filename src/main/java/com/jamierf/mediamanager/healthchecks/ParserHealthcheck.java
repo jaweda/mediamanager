@@ -3,18 +3,18 @@ package com.jamierf.mediamanager.healthchecks;
 import com.google.common.collect.Sets;
 import com.jamierf.mediamanager.io.HttpParser;
 import com.jamierf.mediamanager.managers.ParsingManager;
-import com.yammer.dropwizard.logging.Log;
 import com.yammer.dropwizard.util.Duration;
 import com.yammer.metrics.core.HealthCheck;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Collection;
 
 public class ParserHealthcheck extends HealthCheck {
 
-    private static final Log LOG = Log.forClass(ParserHealthcheck.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ParserHealthcheck.class);
 
     private static boolean isReachable(String host, Duration timeout) {
         try {

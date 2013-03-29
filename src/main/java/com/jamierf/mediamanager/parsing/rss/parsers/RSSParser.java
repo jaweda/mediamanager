@@ -5,22 +5,22 @@ import com.jamierf.mediamanager.io.retry.RetryManager;
 import com.jamierf.mediamanager.parsing.FeedParser;
 import com.jamierf.mediamanager.parsing.ParserException;
 import com.jamierf.mediamanager.parsing.rss.RSSItem;
-import com.yammer.dropwizard.client.HttpClientFactory;
-import com.yammer.dropwizard.client.JerseyClient;
-import com.yammer.dropwizard.logging.Log;
+import com.sun.jersey.api.client.Client;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.ws.rs.HttpMethod;
-import java.io.*;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,7 +29,7 @@ import java.util.Set;
 
 public class RSSParser extends FeedParser<RSSItem> {
 
-	private static final Log LOG = Log.forClass(RSSParser.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RSSParser.class);
 
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
 
@@ -52,7 +52,7 @@ public class RSSParser extends FeedParser<RSSItem> {
 
 	private final SAXReader reader;
 
-	public RSSParser(JerseyClient client, RetryManager retryManager, String url) throws ParserException {
+	public RSSParser(Client client, RetryManager retryManager, String url) throws ParserException {
         super (client, retryManager, url, HttpMethod.GET);
 
         this.reader = RSSParser.getSAXReader();
@@ -75,10 +75,10 @@ public class RSSParser extends FeedParser<RSSItem> {
                 items.add(item);
             }
             catch (MalformedURLException e) {
-                LOG.warn(e, "Unable to parse item link");
+                LOG.warn("Unable to parse item link", e);
             }
             catch (ParseException e) {
-                LOG.warn(e, "Unable to parse item publish date");
+                LOG.warn("Unable to parse item publish date", e);
             }
         }
 

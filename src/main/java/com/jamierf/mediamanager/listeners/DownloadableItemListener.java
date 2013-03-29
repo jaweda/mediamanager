@@ -7,22 +7,25 @@ import com.jamierf.mediamanager.models.State;
 import com.jamierf.mediamanager.parsing.DownloadableItem;
 import com.jamierf.mediamanager.parsing.EpisodeNameParser;
 import com.jamierf.mediamanager.parsing.ItemListener;
-import com.yammer.dropwizard.logging.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
 public class DownloadableItemListener implements ItemListener<DownloadableItem> {
 
-    private static final Log LOG = Log.forClass(DownloadableItemListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DownloadableItemListener.class);
 
     private final Set<String> desiredQualities;
     private final ShowDatabase shows;
     private final Downloader torrentDownloader;
+    private final EpisodeNameParser episodeNameParser;
 
-    public DownloadableItemListener(Set<String> desiredQualities, ShowDatabase shows, Downloader torrentDownloader) {
+    public DownloadableItemListener(Set<String> desiredQualities, ShowDatabase shows, Downloader torrentDownloader, EpisodeNameParser episodeNameParser) {
         this.desiredQualities = desiredQualities;
         this.shows = shows;
         this.torrentDownloader = torrentDownloader;
+        this.episodeNameParser = episodeNameParser;
     }
 
     private Episode getEpisode(Episode.Name name) {
@@ -30,7 +33,7 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
             return shows.get(name);
         }
         catch (Exception e) {
-            LOG.error(e, "Failed to fetch episode from database");
+            LOG.error("Failed to fetch episode from database", e);
             return null;
         }
     }
@@ -45,7 +48,7 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
 
     @Override
     public synchronized void onNewItem(DownloadableItem item) {
-        final Episode.Name name = EpisodeNameParser.parseFilename(item.getTitle());
+        final Episode.Name name = episodeNameParser.parseFilename(item.getTitle());
         if (name == null) {
             if (LOG.isTraceEnabled())
                 LOG.trace("Failed to parse episode title: " + item.getTitle());
@@ -80,7 +83,7 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
             torrentDownloader.download(item.getLink());
         }
         catch (Exception e) {
-            LOG.error(e, "Failed to download torrent");
+            LOG.error("Failed to download torrent", e);
 
             // Return so we don't mark this as pending since we failed to download it
             return;
@@ -91,12 +94,12 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
             this.updateEpisode(episode);
         }
         catch (Exception e) {
-            LOG.error(e, "Failed to update episode in database");
+            LOG.error("Failed to update episode in database", e);
         }
     }
 
     @Override
     public void onException(Throwable cause) {
-        LOG.error(cause, "Failed parsing downloadable item");
+        LOG.error("Failed parsing downloadable item", cause);
     }
 }

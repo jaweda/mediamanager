@@ -1,36 +1,32 @@
 package com.jamierf.mediamanager.listeners;
 
+import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.managers.BackfillManager;
 import com.jamierf.mediamanager.models.Episode;
-import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.models.State;
 import com.jamierf.mediamanager.parsing.EpisodeNameParser;
 import com.jamierf.mediamanager.parsing.ItemListener;
 import com.jamierf.mediamanager.parsing.ical.CalendarItem;
-import com.yammer.dropwizard.logging.Log;
-import com.yammer.dropwizard.util.Duration;
-
-import java.util.Calendar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CalendarItemListener implements ItemListener<CalendarItem> {
 
-    private static final Log LOG = Log.forClass(CalendarItemListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CalendarItemListener.class);
 
     private final ShowDatabase shows;
     private final BackfillManager backfillManager;
-    private final Duration beforeDuration;
-    private final Duration afterDuration;
+    private final EpisodeNameParser episodeNameParser;
 
-    public CalendarItemListener(ShowDatabase shows, BackfillManager backfillManager, Duration beforeDuration, Duration afterDuration) {
+    public CalendarItemListener(ShowDatabase shows, BackfillManager backfillManager, EpisodeNameParser episodeNameParser) {
         this.shows = shows;
         this.backfillManager = backfillManager;
-        this.beforeDuration = beforeDuration;
-        this.afterDuration = afterDuration;
+        this.episodeNameParser = episodeNameParser;
     }
 
     @Override
     public void onNewItem(CalendarItem item) {
-        final Episode.Name name = EpisodeNameParser.parseCalendarSummary(item.getSummary());
+        final Episode.Name name = episodeNameParser.parseCalendarSummary(item.getSummary());
         if (name == null) {
             if (LOG.isTraceEnabled())
                 LOG.trace("Failed to parse episode title: " + item.getSummary());
@@ -55,12 +51,12 @@ public class CalendarItemListener implements ItemListener<CalendarItem> {
             backfillManager.schedule();
         }
         catch (Exception e) {
-            LOG.error(e, "Failed to insert episode in to database");
+            LOG.error("Failed to insert episode in to database", e);
         }
     }
 
     @Override
     public void onException(Throwable cause) {
-        LOG.error(cause, "Failed parsing calendar item");
+        LOG.error("Failed parsing calendar item", cause);
     }
 }

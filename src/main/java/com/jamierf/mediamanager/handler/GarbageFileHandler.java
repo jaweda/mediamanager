@@ -1,8 +1,8 @@
 package com.jamierf.mediamanager.handler;
 
 import com.google.common.collect.ImmutableSet;
-import com.yammer.dropwizard.logging.Log;
-import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,7 @@ public class GarbageFileHandler implements FileTypeHandler {
 
     public static final ImmutableSet<String> EXTENSIONS = ImmutableSet.of("txt", "nfo", "sfv");
 
-    private static final Log LOG = Log.forClass(GarbageFileHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GarbageFileHandler.class);
 
     @Override
     public Collection<String> getHandledExtensions() {

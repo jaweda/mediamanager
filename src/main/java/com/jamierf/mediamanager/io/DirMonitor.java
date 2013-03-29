@@ -2,7 +2,8 @@ package com.jamierf.mediamanager.io;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.yammer.dropwizard.logging.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -10,8 +11,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DirMonitor {
 
-	private static final Log LOG = Log.forClass(DirMonitor.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DirMonitor.class);
 
 	private final Path root;
 	private final FileFilter filter;
@@ -150,7 +149,11 @@ public class DirMonitor {
 
 		synchronized (listeners) {
 			for (FileListener listener : listeners) {
-				listener.onNewFile(file);
+                // Confirm we still have the file (it wasn't deleted by a previous listener)
+                if (!file.exists())
+                    continue;
+
+                listener.onNewFile(file);
 			}
 		}
 	}

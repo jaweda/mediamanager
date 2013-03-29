@@ -1,22 +1,19 @@
 package com.jamierf.mediamanager.downloader;
 
 import com.google.common.hash.Hashing;
-import com.google.common.io.ByteStreams;
-import com.google.common.io.Files;
 import com.jamierf.mediamanager.io.retry.RetryManager;
-import com.yammer.dropwizard.client.JerseyClient;
+import com.sun.jersey.api.client.Client;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URI;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class WatchDirDownloader implements Downloader {
+
+    private static final Logger LOG = LoggerFactory.getLogger(WatchDirDownloader.class);
 
     private static String getFilename(URI link) {
         final String value = link.toString();
@@ -25,17 +22,22 @@ public class WatchDirDownloader implements Downloader {
         return String.format("%s.torrent", hash);
     }
 
-    private final JerseyClient client;
+    private final Client client;
     private final RetryManager retryManager;
     private final File watchDir;
 
-	public WatchDirDownloader(JerseyClient client, RetryManager retryManager, File watchDir) {
+	public WatchDirDownloader(Client client, RetryManager retryManager, File watchDir) {
         this.client = client;
         this.retryManager = retryManager;
         this.watchDir = watchDir;
 
-        if (!watchDir.exists())
+        LOG.info("Using watch dir: {}", watchDir.getAbsolutePath());
+        if (!watchDir.exists()) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("Torrent watch directory '{}' doesn't exist, creating", watchDir);
+
             watchDir.mkdirs();
+        }
 	}
 
     @Override

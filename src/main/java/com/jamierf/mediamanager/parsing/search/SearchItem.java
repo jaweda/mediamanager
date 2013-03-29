@@ -1,9 +1,9 @@
 package com.jamierf.mediamanager.parsing.search;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 import com.jamierf.mediamanager.io.ParsedItem;
 import com.jamierf.mediamanager.parsing.DownloadableItem;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.net.URI;
 

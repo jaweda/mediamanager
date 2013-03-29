@@ -2,17 +2,18 @@ package com.jamierf.mediamanager.parsing.search;
 
 import com.jamierf.mediamanager.io.HttpParser;
 import com.jamierf.mediamanager.io.retry.RetryManager;
+import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
-import com.yammer.dropwizard.client.JerseyClient;
-import com.yammer.dropwizard.logging.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
 public abstract class SearchParser extends HttpParser<SearchItem> {
 
-    private static final Log LOG = Log.forClass(SearchParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SearchParser.class);
 
-    public SearchParser(JerseyClient client, RetryManager retryManager, String url, String method) {
+    public SearchParser(Client client, RetryManager retryManager, String url, String method) {
         super(client, retryManager, url, method);
     }
 

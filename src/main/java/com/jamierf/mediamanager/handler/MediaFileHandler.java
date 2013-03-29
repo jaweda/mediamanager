@@ -4,7 +4,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 import com.jamierf.mediamanager.listeners.MediaFileListener;
 import com.jamierf.mediamanager.managers.DownloadDirManager;
-import com.yammer.dropwizard.logging.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class MediaFileHandler implements FileTypeHandler {
         return EXTENSIONS.contains(extension) && !MEDIA_REJECT_PATTERN.matcher(path).find();
     }
 
-	private static final Log LOG = Log.forClass(MediaFileHandler.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MediaFileHandler.class);
 
     private final File destDir;
     private final boolean move;
@@ -47,8 +48,8 @@ public class MediaFileHandler implements FileTypeHandler {
         if (!MediaFileHandler.acceptFile(file.getName())) {
             // If we were passed the file but didn't accept it then delete it
 
-            if (LOG.isTraceEnabled())
-                LOG.trace("Deleting media file that was rejected: {}", file.getName());
+            if (LOG.isDebugEnabled())
+                LOG.debug("Deleting media file that was rejected: {}", file.getName());
 
             file.delete();
             return;
@@ -64,14 +65,14 @@ public class MediaFileHandler implements FileTypeHandler {
 			destDir.mkdirs();
 
 		if (move) {
-			if (LOG.isTraceEnabled())
-				LOG.trace("Moving {} to {}", relativePath, destFile.getAbsoluteFile());
+			if (LOG.isDebugEnabled())
+				LOG.debug("Moving {} to {}", relativePath, destFile.getAbsoluteFile());
 
             Files.move(file, destFile);
 		}
 		else {
-			if (LOG.isTraceEnabled())
-				LOG.trace("Copying {} to {}", relativePath, destFile.getAbsoluteFile());
+			if (LOG.isDebugEnabled())
+				LOG.debug("Copying {} to {}", relativePath, destFile.getAbsoluteFile());
 
             Files.copy(file, destFile);
 		}

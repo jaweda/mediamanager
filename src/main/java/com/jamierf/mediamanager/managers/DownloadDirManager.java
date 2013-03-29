@@ -7,18 +7,16 @@ import com.jamierf.mediamanager.handler.FileTypeHandler;
 import com.jamierf.mediamanager.io.DirMonitor;
 import com.jamierf.mediamanager.io.FileListener;
 import com.yammer.dropwizard.lifecycle.Managed;
-import com.yammer.dropwizard.logging.Log;
-import de.innosystec.unrar.rarfile.FileHeader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class DownloadDirManager implements FileListener, Managed {
 
-	private static final Log LOG = Log.forClass(DownloadDirManager.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DownloadDirManager.class);
 
     public static String getFileName(String name) {
         final int delim = name.lastIndexOf('.');
@@ -43,21 +41,14 @@ public class DownloadDirManager implements FileListener, Managed {
     private FileHandler defaultHandler;
 
 	public DownloadDirManager(FileConfiguration config) throws IOException {
-        final File destinationDir = config.getDestinationDir();
         final File watchDir = config.getWatchDir();
 
+        LOG.info("Using download dir: {}", watchDir.getAbsolutePath());
         if (!watchDir.exists()) {
             if (LOG.isDebugEnabled())
-                LOG.debug("File watch directory '{}' doesn't exist, creating", watchDir);
+                LOG.debug("File download directory '{}' doesn't exist, creating", watchDir);
 
             watchDir.mkdirs();
-        }
-
-        if (!destinationDir.exists()) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("File destination directory '{}' doesn't exist, creating", destinationDir);
-
-            destinationDir.mkdirs();
         }
 
 		monitor = new DirMonitor(watchDir);
@@ -127,7 +118,7 @@ public class DownloadDirManager implements FileListener, Managed {
 			handler.handleFile(path, file);
 		}
 		catch (Exception e) {
-            LOG.warn(e, "Error handling file");
+            LOG.warn("Error handling file", e);
 		}
 	}
 }

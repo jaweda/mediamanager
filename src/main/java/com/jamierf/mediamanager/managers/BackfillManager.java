@@ -8,9 +8,12 @@ import com.jamierf.mediamanager.models.Episode;
 import com.jamierf.mediamanager.parsing.ItemListener;
 import com.jamierf.mediamanager.parsing.search.SearchItem;
 import com.jamierf.mediamanager.parsing.search.SearchParser;
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.yammer.dropwizard.lifecycle.Managed;
-import com.yammer.dropwizard.logging.Log;
 import com.yammer.dropwizard.util.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -21,7 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class BackfillManager implements Managed, Runnable, ParsingManager {
 
-    private static final Log LOG = Log.forClass(BackfillManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BackfillManager.class);
 
     private static final Duration THROTTLE_DELAY = Duration.seconds(5);
     private static final Duration START_DELAY = Duration.minutes(1);
@@ -50,7 +53,7 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
         parsers = Lists.newLinkedList();
         listeners = Lists.newLinkedList();
 
-        future = new AtomicReference<ScheduledFuture<?>>();
+        future = new AtomicReference();
     }
 
     @Override
@@ -104,7 +107,7 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
                 Thread.sleep(delay);
             }
             catch (Exception e) {
-                LOG.error(e, "Failed searching for episode: {}", episode.getName());
+                LOG.error("Failed searching for episode: " + episode.getName(), e);
             }
         }
     }
@@ -127,9 +130,22 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
                     final Set<SearchItem> parsedItems = parser.search(query);
                     items.addAll(parsedItems);
                 }
+                catch (ClientHandlerException e) {
+                    if (LOG.isDebugEnabled())
+                        LOG.debug("Timeout connecting to {}", parser.getUrl());
+
+                    exceptions.add(e);
+                }
+                catch (UniformInterfaceException e) {
+                    final int status = e.getResponse().getStatus();
+                    if (LOG.isDebugEnabled())
+                        LOG.debug("HTTP error {} from {}", status, parser.getUrl());
+
+                    exceptions.add(e);
+                }
                 catch (Exception e) {
                     if (LOG.isDebugEnabled())
-                        LOG.debug(e, "Caught exception while parsing search");
+                        LOG.debug("Caught exception while parsing search", e);
 
                     exceptions.add(e);
                 }

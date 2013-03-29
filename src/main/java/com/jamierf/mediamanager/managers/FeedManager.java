@@ -1,18 +1,20 @@
 package com.jamierf.mediamanager.managers;
 
+import com.fasterxml.jackson.jaxrs.json.util.LRUMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.jamierf.mediamanager.parsing.FeedItem;
 import com.jamierf.mediamanager.parsing.FeedParser;
 import com.jamierf.mediamanager.parsing.ItemListener;
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.yammer.dropwizard.lifecycle.Managed;
-import com.yammer.dropwizard.logging.Log;
 import com.yammer.dropwizard.util.Duration;
-import org.codehaus.jackson.map.util.LRUMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -20,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class FeedManager<T extends FeedItem> implements Managed, Runnable, ParsingManager {
 
-    private static final Log LOG = Log.forClass(FeedManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FeedManager.class);
 
     private static final int CACHE_SIZE = 1000;
 
@@ -44,7 +46,7 @@ public class FeedManager<T extends FeedItem> implements Managed, Runnable, Parsi
         // Store a cache of already seen items with LRU eviction
         oldItems = Sets.newSetFromMap(new LRUMap<T, Boolean>(16, CACHE_SIZE));
 
-        future = new AtomicReference<ScheduledFuture<?>>();
+        future = new AtomicReference();
     }
 
     @Override
@@ -82,9 +84,21 @@ public class FeedManager<T extends FeedItem> implements Managed, Runnable, Parsi
                         oldItems.add(item);
                     }
                 }
-                catch (Exception e) {
+                catch (ClientHandlerException e) {
                     if (LOG.isDebugEnabled())
-                        LOG.debug(e, "Caught exception while parsing feed {}", parser.getUrl());
+                        LOG.debug("Timeout connecting to {}", parser.getUrl());
+
+                    exceptions.add(e);
+                }
+                catch (UniformInterfaceException e) {
+                    final int status = e.getResponse().getStatus();
+                    if (LOG.isDebugEnabled())
+                        LOG.debug("HTTP error {} from {}", status, parser.getUrl());
+
+                    exceptions.add(e);
+                }
+                catch (Exception e) {
+                    LOG.warn("Caught exception while parsing feed " + parser.getUrl(), e);
 
                     exceptions.add(e);
                 }

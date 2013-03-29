@@ -3,14 +3,11 @@ package com.jamierf.mediamanager.parsing.rss.parsers;
 import com.jamierf.mediamanager.config.ParserConfiguration;
 import com.jamierf.mediamanager.io.retry.RetryManager;
 import com.jamierf.mediamanager.parsing.ParserException;
-import com.jamierf.mediamanager.parsing.rss.parsers.RSSParser;
-import com.yammer.dropwizard.client.HttpClientFactory;
-import com.yammer.dropwizard.client.JerseyClient;
+import com.sun.jersey.api.client.Client;
 
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Map;
 
 public class SCCParser extends RSSParser {
 
@@ -23,7 +20,7 @@ public class SCCParser extends RSSParser {
         return "&cat=" + categories;
     }
 
-	public SCCParser(JerseyClient client, RetryManager retryManager, ParserConfiguration config) throws MalformedURLException, ParserException {
+	public SCCParser(Client client, RetryManager retryManager, ParserConfiguration config) throws MalformedURLException, ParserException {
 		super (client, retryManager, String.format(FEED_URL, config.getString("passKey")) + SCCParser.getCategoryFragment(config.getString("categories")));
 	}
 

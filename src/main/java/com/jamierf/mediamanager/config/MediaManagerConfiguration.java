@@ -1,8 +1,11 @@
 package com.jamierf.mediamanager.config;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yammer.dropwizard.client.JerseyClientConfiguration;
 import com.yammer.dropwizard.config.Configuration;
-import org.codehaus.jackson.annotate.JsonProperty;
+
+import java.util.Collections;
+import java.util.Map;
 
 public class MediaManagerConfiguration extends Configuration {
 
@@ -23,6 +26,9 @@ public class MediaManagerConfiguration extends Configuration {
 
     @JsonProperty
     private FileConfiguration files = new FileConfiguration();
+
+    @JsonProperty
+    private Map<String, String> aliases = Collections.emptyMap();
 
     public JerseyClientConfiguration getHttpClientConfiguration() {
         return httpClient;
@@ -46,5 +52,9 @@ public class MediaManagerConfiguration extends Configuration {
 
     public FileConfiguration getFileConfiguration() {
         return files;
+    }
+
+    public Map<String, String> getAliases() {
+        return aliases;
     }
 }

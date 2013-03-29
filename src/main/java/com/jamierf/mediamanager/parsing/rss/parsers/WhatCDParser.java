@@ -4,8 +4,7 @@ import com.jamierf.mediamanager.config.ParserConfiguration;
 import com.jamierf.mediamanager.io.retry.RetryManager;
 import com.jamierf.mediamanager.parsing.ParserException;
 import com.jamierf.mediamanager.parsing.rss.RSSItem;
-import com.yammer.dropwizard.client.HttpClientFactory;
-import com.yammer.dropwizard.client.JerseyClient;
+import com.sun.jersey.api.client.Client;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.net.MalformedURLException;
@@ -17,7 +16,7 @@ public class WhatCDParser extends RSSParser {
 
 	private static final String FEED_URL = "https://ssl.what.cd/feeds.php?feed=torrents_all&user=%d&auth=%s&passkey=%s&authkey=%s";
 
-	public WhatCDParser(JerseyClient client, RetryManager retryManager, ParserConfiguration config) throws MalformedURLException, ParserException {
+	public WhatCDParser(Client client, RetryManager retryManager, ParserConfiguration config) throws MalformedURLException, ParserException {
 		super (client, retryManager, String.format(FEED_URL, config.getInt("userId"), config.getString("authId"), config.getString("passKey"), config.getString("authKey")));
 	}
 

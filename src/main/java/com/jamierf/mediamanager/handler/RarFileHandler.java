@@ -2,10 +2,11 @@ package com.jamierf.mediamanager.handler;
 
 import com.google.common.collect.ImmutableSet;
 import com.jamierf.mediamanager.managers.DownloadDirManager;
-import com.yammer.dropwizard.logging.Log;
 import de.innosystec.unrar.Archive;
 import de.innosystec.unrar.exception.RarException;
 import de.innosystec.unrar.rarfile.FileHeader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,7 +21,7 @@ public class RarFileHandler implements FileTypeHandler {
 	private static final ImmutableSet<String> EXTENSIONS = ImmutableSet.of("rar");
     private static final Pattern PATH_NORMALISATION_REGEX = Pattern.compile("[\\\\/]");
 
-	private static final Log LOG = Log.forClass(RarFileHandler.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RarFileHandler.class);
 
     protected final File destDir;
     protected final boolean delete;
@@ -72,11 +73,9 @@ public class RarFileHandler implements FileTypeHandler {
 
                 final String path = PATH_NORMALISATION_REGEX.matcher(fileHeader.getFileNameString()).replaceAll(File.separator);
                 final File destFile = this.getDestinationFile(path);
-				if (destFile.exists()) // Skip any existing files
-					continue;
 
-				if (LOG.isTraceEnabled())
-					LOG.trace("Extracting {} to {}", fileHeader.getFileNameString(), destFile.getAbsoluteFile());
+				if (LOG.isDebugEnabled())
+					LOG.debug("Extracting {} to {}", fileHeader.getFileNameString(), destFile.getAbsoluteFile());
 
 				// Make the parent directory if required
 				final File destDir = destFile.getParentFile();

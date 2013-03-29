@@ -1,13 +1,16 @@
 package com.jamierf.mediamanager.db;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.jamierf.mediamanager.config.DatabaseConfiguration;
 import com.jamierf.mediamanager.models.Episode;
 import com.sleepycat.je.*;
-import com.yammer.dropwizard.json.Json;
-import com.yammer.dropwizard.logging.Log;
+import com.yammer.dropwizard.json.ObjectMapperFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,15 +18,19 @@ import java.util.Collection;
 
 public class BDBShowDatabase implements ShowDatabase {
 
-    private static final Log LOG = Log.forClass(BDBShowDatabase.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BDBShowDatabase.class);
 
     private static final String DB_NAME = "shows.db";
 
-    private static final Json JSON = new Json();
+    private static final ObjectMapper JSON = new ObjectMapperFactory().build();
 
     private static DatabaseEntry createKey(Episode.Name name) {
-        final String key = String.format("%s.%d.%d", name.getCleanedTitle(), name.getSeason(), name.getEpisode());
+        final String key = String.format("%s.%d.%d", name.getTitle(), name.getSeason(), name.getEpisode()).toLowerCase();
         return new DatabaseEntry(key.getBytes());
+    }
+
+    private static DatabaseEntry createValue(Episode episode) throws JsonProcessingException {
+        return new DatabaseEntry(JSON.writeValueAsBytes(episode));
     }
 
     private final File file;
@@ -46,20 +53,32 @@ public class BDBShowDatabase implements ShowDatabase {
 
     @Override
     public boolean addOrUpdate(Episode episode) {
-        final DatabaseEntry key = BDBShowDatabase.createKey(episode.getName());
-        final DatabaseEntry value = new DatabaseEntry(JSON.writeValueAsBytes(episode));
+        try {
+            final DatabaseEntry key = BDBShowDatabase.createKey(episode.getName());
+            final DatabaseEntry value = BDBShowDatabase.createValue(episode);
 
-        final OperationStatus status = db.put(null, key, value);
-        return status == OperationStatus.SUCCESS;
+            final OperationStatus status = db.put(null, key, value);
+            return status == OperationStatus.SUCCESS;
+        }
+        catch (JsonProcessingException e) {
+            LOG.error("Error serializing episode", e);
+            return false;
+        }
     }
 
     @Override
     public boolean addIfNotExists(Episode episode) {
-        final DatabaseEntry key = BDBShowDatabase.createKey(episode.getName());
-        final DatabaseEntry value = new DatabaseEntry(JSON.writeValueAsBytes(episode));
+        try {
+            final DatabaseEntry key = BDBShowDatabase.createKey(episode.getName());
+            final DatabaseEntry value = BDBShowDatabase.createValue(episode);
 
-        final OperationStatus status = db.putNoOverwrite(null, key, value);
-        return status == OperationStatus.SUCCESS;
+            final OperationStatus status = db.putNoOverwrite(null, key, value);
+            return status == OperationStatus.SUCCESS;
+        }
+        catch (JsonProcessingException e) {
+            LOG.error("Error serializing episode", e);
+            return false;
+        }
     }
 
     @Override
@@ -90,7 +109,7 @@ public class BDBShowDatabase implements ShowDatabase {
                     episodes.add(episode);
                 }
                 catch (IOException e) {
-                    LOG.warn(e, "Failed to read row from database");
+                    LOG.warn("Failed to read row from database", e);
                 }
             }
         }

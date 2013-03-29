@@ -5,8 +5,8 @@ import com.jamierf.mediamanager.config.ParserConfiguration;
 import com.jamierf.mediamanager.io.retry.RetryManager;
 import com.jamierf.mediamanager.parsing.search.SearchItem;
 import com.jamierf.mediamanager.parsing.search.SearchParser;
+import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
-import com.yammer.dropwizard.client.JerseyClient;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -34,7 +34,7 @@ public class HDBitsParser extends SearchParser {
     private final String hash;
     private final String passKey;
 
-    public HDBitsParser(JerseyClient client, RetryManager retryManager, ParserConfiguration config) {
+    public HDBitsParser(Client client, RetryManager retryManager, ParserConfiguration config) {
         super(client, retryManager, SEARCH_URL, HttpMethod.GET);
 
         uid = config.getInt("uid");

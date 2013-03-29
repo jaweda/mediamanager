@@ -1,24 +1,13 @@
 package com.jamierf.mediamanager.models;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
-
-import java.util.regex.Pattern;
 
 public class Episode {
 
     public static class Name {
-
-        private static final Pattern SHOW_TITLE_CLEAN_REGEX = Pattern.compile("[\\W]", Pattern.CASE_INSENSITIVE);
-
-        private static String cleanShowTitle(String title) {
-            if (title == null)
-                return null;
-
-            return SHOW_TITLE_CLEAN_REGEX.matcher(title).replaceAll("").toLowerCase();
-        }
 
         @JsonProperty
         private final String title;
@@ -41,16 +30,11 @@ public class Episode {
             this.title = title;
             this.season = season;
             this.episode = episode;
-            this.quality = quality;
+            this.quality = quality == null ? null : quality.toLowerCase();
         }
 
         public String getTitle() {
             return title;
-        }
-
-        @JsonIgnore
-        public String getCleanedTitle() {
-            return Name.cleanShowTitle(title);
         }
 
         public int getSeason() {
@@ -94,11 +78,14 @@ public class Episode {
             builder.append(title);
             builder.append(" ");
 
-            builder.append("s").append(Strings.padStart(String.valueOf(season), 2, '0'));
+            // Only append season if we have one
+            if (season > 0)
+                builder.append("s").append(Strings.padStart(String.valueOf(season), 2, '0'));
+
             builder.append("e").append(Strings.padStart(String.valueOf(episode), 2, '0'));
 
             // If it has a quality rating then include that
-            if (quality != null && !quality.isEmpty()) {
+            if (!Strings.isNullOrEmpty(quality)) {
                 builder.append(" ");
                 builder.append(quality);
             }

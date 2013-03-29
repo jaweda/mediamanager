@@ -4,20 +4,16 @@ import com.google.common.collect.ImmutableSet;
 import com.jamierf.mediamanager.io.retry.RetryManager;
 import com.jamierf.mediamanager.parsing.FeedParser;
 import com.jamierf.mediamanager.parsing.ical.CalendarItem;
-import com.yammer.dropwizard.client.HttpClientFactory;
-import com.yammer.dropwizard.client.JerseyClient;
-import com.yammer.dropwizard.logging.Log;
+import com.sun.jersey.api.client.Client;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.HttpMethod;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.StringReader;
-import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,7 +22,7 @@ import java.util.Set;
 
 public class CalendarParser extends FeedParser<CalendarItem> {
 
-    private static final Log LOG = Log.forClass(CalendarParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CalendarParser.class);
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
 
@@ -40,7 +36,7 @@ public class CalendarParser extends FeedParser<CalendarItem> {
 
     private final CalendarBuilder builder;
 
-    public CalendarParser(JerseyClient client, RetryManager retryManager, String url) {
+    public CalendarParser(Client client, RetryManager retryManager, String url) {
         super(client, retryManager, url, HttpMethod.GET);
 
         builder = new CalendarBuilder();
@@ -61,7 +57,7 @@ public class CalendarParser extends FeedParser<CalendarItem> {
                 items.add(item);
             }
             catch (ParseException e) {
-                LOG.warn(e, "Failed to parse item start/end date");
+                LOG.warn("Failed to parse item start/end date", e);
             }
         }
 
