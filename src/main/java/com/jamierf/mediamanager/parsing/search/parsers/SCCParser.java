@@ -13,7 +13,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.Cookie;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -34,11 +33,15 @@ public class SCCParser extends SearchParser {
     private final String passKey;
 
     public SCCParser(Client client, RetryManager retryManager, ParserConfiguration config) {
+        this (client, retryManager, config.getInt("uid"), config.getString("pass"), config.getString("passKey"));
+    }
+
+    public SCCParser(Client client, RetryManager retryManager, int uid, String pass, String passKey) {
         super(client, retryManager, SEARCH_URL, HttpMethod.GET);
 
-        uid = config.getInt("uid");
-        pass = config.getString("pass");
-        passKey = config.getString("passKey");
+        this.uid = uid;
+        this.pass = pass;
+        this.passKey = passKey;
     }
 
     private URI createLink(String name, int id) throws MalformedURLException, UnsupportedEncodingException {
@@ -48,11 +51,12 @@ public class SCCParser extends SearchParser {
 
     @Override
     protected WebResource.Builder buildResource(String query) {
+        final String cookie = String.format("uid=%d; pass=%s", uid, pass);
+
         return super.buildResource()
                 .queryParam("search", query)
                 .queryParam("method", "2")
-                .cookie(new Cookie("uid", String.valueOf(uid)))
-                .cookie(new Cookie("pass", pass));
+                .header("Cookie", cookie);
     }
 
     @Override

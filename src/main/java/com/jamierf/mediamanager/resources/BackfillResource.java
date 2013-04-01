@@ -5,6 +5,7 @@ import com.jamierf.mediamanager.managers.BackfillManager;
 import com.jamierf.mediamanager.models.Episode;
 import com.jamierf.mediamanager.models.State;
 import com.jamierf.mediamanager.parsing.EpisodeNameParser;
+import com.jamierf.mediamanager.views.BackfillForm;
 import com.yammer.dropwizard.views.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,16 +18,6 @@ import javax.ws.rs.core.Response;
 public class BackfillResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(BackfillResource.class);
-
-    public static class BackfillForm extends View {
-        public BackfillForm() {
-            super("backfill.mustache");
-        }
-
-        public String getTitle() {
-            return "Backfill";
-        }
-    }
 
     private final ShowDatabase shows;
     private final BackfillManager manager;
@@ -41,7 +32,7 @@ public class BackfillResource {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public View displayForm() {
-        return new BackfillResource.BackfillForm();
+        return new BackfillForm();
     }
 
     @POST

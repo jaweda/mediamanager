@@ -13,7 +13,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.Cookie;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -35,12 +34,16 @@ public class HDBitsParser extends SearchParser {
     private final String passKey;
 
     public HDBitsParser(Client client, RetryManager retryManager, ParserConfiguration config) {
+        this (client, retryManager, config.getInt("uid"), config.getString("pass"), config.getString("hash"), config.getString("passKey"));
+    }
+
+    public HDBitsParser(Client client, RetryManager retryManager, int uid, String pass, String hash, String passKey) {
         super(client, retryManager, SEARCH_URL, HttpMethod.GET);
 
-        uid = config.getInt("uid");
-        pass = config.getString("pass");
-        hash = config.getString("hash");
-        passKey = config.getString("passKey");
+        this.uid = uid;
+        this.pass = pass;
+        this.hash = hash;
+        this.passKey = passKey;
     }
 
     private URI createLink(String name, int id) throws MalformedURLException, UnsupportedEncodingException {
@@ -50,11 +53,11 @@ public class HDBitsParser extends SearchParser {
 
     @Override
     protected WebResource.Builder buildResource(String query) {
+        final String cookie = String.format("uid=%d; pass=%s; hash=%s", uid, pass, hash);
+
         return super.buildResource()
                 .queryParam("search", query)
-                .cookie(new Cookie("uid", String.valueOf(uid)))
-                .cookie(new Cookie("pass", pass))
-                .cookie(new Cookie("hash", hash));
+                .header("Cookie", cookie);
     }
 
     @Override
