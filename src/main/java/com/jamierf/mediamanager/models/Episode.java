@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
 
-public class Episode {
+public class Episode implements Comparable<Episode> {
 
-    public static class Name {
+    public static class Name implements Comparable<Name> {
 
         @JsonProperty
         private final String title;
@@ -92,6 +92,14 @@ public class Episode {
 
             return builder.toString();
         }
+
+        @Override
+        public int compareTo(Name o) {
+            final String thisName = this.toString();
+            final String otherName = o.toString();
+
+            return thisName.compareTo(otherName);
+        }
     }
 
     @JsonProperty
@@ -148,5 +156,10 @@ public class Episode {
     @Override
     public String toString() {
         return String.format("%s (%s)", name, state);
+    }
+
+    @Override
+    public int compareTo(Episode o) {
+        return name.compareTo(o.name);
     }
 }

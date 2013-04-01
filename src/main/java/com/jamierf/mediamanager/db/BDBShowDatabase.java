@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.jamierf.mediamanager.config.DatabaseConfiguration;
 import com.jamierf.mediamanager.models.Episode;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
 public class BDBShowDatabase implements ShowDatabase {
 
@@ -94,8 +96,8 @@ public class BDBShowDatabase implements ShowDatabase {
     }
 
     @Override
-    public Collection<Episode> getAllEpisodes() {
-        final ImmutableSet.Builder<Episode> episodes = ImmutableSet.builder();
+    public List<Episode> getAllEpisodes() {
+        final ImmutableList.Builder<Episode> episodes = ImmutableList.builder();
 
         final Cursor cursor = db.openCursor(null, null);
 
