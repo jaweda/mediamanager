@@ -3,9 +3,9 @@
     {{> head}}
     <body>
         <h1>{{title}}</h1>
-        <ul>
+        <ul class="episode-list">
 {{#episodes}}
-            <li>{{.}}</li>
+            <li class="state-{{state}}">{{name}}</li>
 {{/episodes}}
         </ul>
     </body>

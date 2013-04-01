@@ -116,6 +116,10 @@ public class Episode {
         return name;
     }
 
+    public State getState() {
+        return state;
+    }
+
     @JsonIgnore
     public boolean isDesired() {
         return state == State.DESIRED;

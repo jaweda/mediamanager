@@ -1,0 +1,15 @@
+body {
+    margin: 20px;
+}
+
+.episode-list .state-DESIRED {
+    color: #8b0000;
+}
+
+.episode-list .state-EXISTS {
+    color: #006400;
+}
+
+.episode-list .state-PENDING {
+    color: #ff8c00;
+}
