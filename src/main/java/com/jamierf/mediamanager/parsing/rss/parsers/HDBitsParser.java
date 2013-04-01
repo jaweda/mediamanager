@@ -9,9 +9,10 @@ import java.net.MalformedURLException;
 
 public class HDBitsParser extends RSSParser {
 
-	private static final String FEED_URL = "http://hdbits.org/rss.php?feed=dl&passkey=%s";
+    // category = h264 TV encodes
+    private static final String FEED_URL = "http://hdbits.org/rss.php?feed=dl&cats[]=2c1c3&passkey=%s";
 
-	public HDBitsParser(Client client, RetryManager retryManager, ParserConfiguration config) throws MalformedURLException, ParserException {
-		super (client, retryManager, String.format(FEED_URL, config.getString("passKey")));
-	}
+    public HDBitsParser(Client client, RetryManager retryManager, ParserConfiguration config) throws MalformedURLException, ParserException {
+        super (client, retryManager, String.format(FEED_URL, config.getString("passKey")));
+    }
 }

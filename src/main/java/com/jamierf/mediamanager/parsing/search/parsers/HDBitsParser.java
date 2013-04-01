@@ -23,7 +23,8 @@ import java.util.regex.Pattern;
 
 public class HDBitsParser extends SearchParser {
 
-    private static final String SEARCH_URL = "https://hdbits.org/browse.php";
+    // category = h264 TV encodes
+    private static final String SEARCH_URL = "https://hdbits.org/browse.php?descriptions=0&c2=1&co1=1&m3=1&incldead=0";
     private static final String LINK_URL = "https://hdbits.org/download.php/%s?id=%d&passkey=%s";
 
     private static final Pattern URL_ID_REGEX = Pattern.compile("id=(\\d+)", Pattern.CASE_INSENSITIVE);

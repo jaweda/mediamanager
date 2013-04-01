@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 public class SCCParser extends SearchParser {
 
-    private static final String SEARCH_URL = "https://sceneaccess.eu/browse";
+    private static final String SEARCH_URL = "https://sceneaccess.eu/browse?method=2";
     private static final String LINK_URL = "https://sceneaccess.eu/download/%d/%s/%s";
 
     private static final Pattern URL_ID_REGEX = Pattern.compile("id=(\\d+)", Pattern.CASE_INSENSITIVE);
@@ -55,7 +55,6 @@ public class SCCParser extends SearchParser {
 
         return super.buildResource()
                 .queryParam("search", query)
-                .queryParam("method", "2")
                 .header("Cookie", cookie);
     }
 
