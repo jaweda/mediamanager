@@ -1,18 +1,22 @@
 #!/bin/bash
 
+DIR=`dirname $0`
 PID_FILE="pid.run"
 
-if [ ! -f $PID_FILE ];
+pushd $DIR
+
+if [ ! -f $PID_FILE ]
 then
-        echo "Process not found"
-        exit 1
+    echo "Process not found"
+else
+    # Get the process ID
+    PID=`cat $PID_FILE`
+
+    # Stop the process
+    kill $PID
+    rm $PID_FILE
+
+    echo "Stopping process $PID"
 fi
 
-# Get the process ID
-PID=`cat $PID_FILE`
-
-# Stop the process
-kill $PID
-rm $PID_FILE
-
-echo "Stopping process $PID"
+popd
