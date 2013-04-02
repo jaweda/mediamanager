@@ -46,7 +46,7 @@ public class EpisodeNameParser {
 
         for (Map.Entry<String, String> entry : aliases.entrySet()) {
             final String key = EpisodeNameParser.cleanTitle(entry.getKey());
-            final String value = EpisodeNameParser.cleanTitle(entry.getKey());
+            final String value = EpisodeNameParser.cleanTitle(entry.getValue());
 
             builder.put(key, value);
         }
