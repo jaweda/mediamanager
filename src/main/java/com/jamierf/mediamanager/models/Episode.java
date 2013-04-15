@@ -84,12 +84,6 @@ public class Episode implements Comparable<Episode> {
 
             builder.append("e").append(Strings.padStart(String.valueOf(episode), 2, '0'));
 
-            // If it has a quality rating then include that
-            if (!Strings.isNullOrEmpty(quality)) {
-                builder.append(" ");
-                builder.append(quality);
-            }
-
             return builder.toString();
         }
 
