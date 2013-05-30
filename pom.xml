@@ -30,32 +30,6 @@
 		<developerConnection>scm:git:git@github.com:reines/mediamanager.git</developerConnection>
 	</scm>
 
-	<distributionManagement>
-		<repository>
-			<id>jamierf-release</id>
-			<url>http://robin.jamierf.co.uk:8081/nexus/content/repositories/releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>jamierf-snapshot</id>
-			<url>http://robin.jamierf.co.uk:8081/nexus/content/repositories/snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
-
-    <repositories>
-        <repository>
-            <id>jamierf-public</id>
-            <url>http://robin.jamierf.co.uk:8081/nexus/content/repositories/public/</url>
-        </repository>
-        <repository>
-            <id>jamierf-release</id>
-            <url>http://robin.jamierf.co.uk:8081/nexus/content/repositories/releases/</url>
-        </repository>
-        <repository>
-            <id>jamierf-snapshot</id>
-            <url>http://robin.jamierf.co.uk:8081/nexus/content/repositories/snapshots/</url>
-        </repository>
-    </repositories>
-
 	<build>
 		<plugins>
 			<plugin>
