@@ -2,7 +2,7 @@
 
 MediaManager is a personal project for managing media. It handles automatically downloading desired TV shows and moving to the correct directory.
 
-![Build Status](https://api.travis-ci.org/reines/mediamanager.png)
+[![Build Status](https://api.travis-ci.org/reines/mediamanager.png)](https://travis-ci.org/reines/mediamanager)
 
 - Periodically checking [The TV Calendar](http://www.pogdesign.co.uk/cat/) to find out which shows to watch out for.
 - Periodically checking various torrent sites (support for a limited of private sites) and matching new episodes against the list of desired episodes.
