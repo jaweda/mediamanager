@@ -3,11 +3,11 @@ package com.jamierf.mediamanager.healthchecks;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.yammer.metrics.core.HealthCheck;
 
-public class DatabaseHealthCheck extends HealthCheck {
+public class DatabaseHealthcheck extends HealthCheck {
 
     private final ShowDatabase shows;
 
-    public DatabaseHealthCheck(ShowDatabase shows) {
+    public DatabaseHealthcheck(ShowDatabase shows) {
         super("database");
 
         this.shows = shows;

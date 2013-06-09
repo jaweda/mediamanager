@@ -8,7 +8,7 @@ import com.jamierf.mediamanager.downloader.WatchDirDownloader;
 import com.jamierf.mediamanager.handler.GarbageFileHandler;
 import com.jamierf.mediamanager.handler.MediaFileHandler;
 import com.jamierf.mediamanager.handler.MediaRarFileHandler;
-import com.jamierf.mediamanager.healthchecks.DatabaseHealthCheck;
+import com.jamierf.mediamanager.healthchecks.DatabaseHealthcheck;
 import com.jamierf.mediamanager.healthchecks.ParserHealthcheck;
 import com.jamierf.mediamanager.io.StaticAssetForwarder;
 import com.jamierf.mediamanager.io.retry.DelayedJerseyRetryManager;
@@ -200,6 +200,6 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
 
         // Add ping healthchecks for torrents, calendar, and backfill
         env.addHealthCheck(new ParserHealthcheck(config.getHttpClientConfiguration().getConnectionTimeout(), torrentFeedManager, calendarFeedManager, backfillManager));
-        env.addHealthCheck(new DatabaseHealthCheck(shows));
+        env.addHealthCheck(new DatabaseHealthcheck(shows));
     }
 }
