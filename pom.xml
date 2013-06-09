@@ -7,7 +7,7 @@
 
     <properties>
         <dropwizard.version>0.6.2</dropwizard.version>
-        <unrar.version>1.7.0</unrar.version>
+        <junrar.version>0.7</junrar.version>
         <dom4j.version>1.6.1</dom4j.version>
         <jaxen.version>1.1.1</jaxen.version>
         <jsoup.version>1.7.1</jsoup.version>
@@ -93,11 +93,11 @@
             <artifactId>dropwizard-views</artifactId>
             <version>${dropwizard.version}</version>
         </dependency>
-		<dependency>
-			<groupId>de.innosystec</groupId>
-			<artifactId>java-unrar</artifactId>
-			<version>${unrar.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>com.github.junrar</groupId>
+            <artifactId>junrar</artifactId>
+            <version>${junrar.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>

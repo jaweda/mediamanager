@@ -1,10 +1,10 @@
 package com.jamierf.mediamanager.handler;
 
+import com.github.junrar.Archive;
+import com.github.junrar.exception.RarException;
+import com.github.junrar.rarfile.FileHeader;
 import com.google.common.collect.ImmutableSet;
 import com.jamierf.mediamanager.managers.DownloadDirManager;
-import de.innosystec.unrar.Archive;
-import de.innosystec.unrar.exception.RarException;
-import de.innosystec.unrar.rarfile.FileHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,12 +47,15 @@ public class RarFileHandler implements FileTypeHandler {
         return new File(destDir.getAbsolutePath() + File.separator + path);
     }
 
-    protected boolean extractFile(Archive archive, FileHeader fileHeader, File destFile) throws IOException, RarException {
+    protected boolean extractFile(Archive archive, FileHeader fileHeader, File destFile) throws IOException {
         final OutputStream out = new FileOutputStream(destFile);
 
         try {
             archive.extractFile(fileHeader, out);
             return true;
+        }
+        catch (RarException e) {
+            throw new IOException(e);
         }
         finally {
             out.close();
