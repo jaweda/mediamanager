@@ -68,7 +68,7 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
         // Check it is a desired quality
         if (!desiredQualities.contains(name.getQuality())) {
             if (LOG.isTraceEnabled())
-                LOG.trace("Skipping torrent {}, desired quality {}", name, desiredQualities);
+                LOG.trace("Skipping torrent {}, quality {}, desired {}", name, name.getQuality(), desiredQualities);
 
             return;
         }

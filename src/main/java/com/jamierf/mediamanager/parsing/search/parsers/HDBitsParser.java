@@ -11,6 +11,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.HttpMethod;
 import java.io.UnsupportedEncodingException;
@@ -24,10 +26,11 @@ import java.util.regex.Pattern;
 public class HDBitsParser extends SearchParser {
 
     // category = h264 TV encodes
-    private static final String SEARCH_URL = "https://hdbits.org/browse.php?descriptions=0&c2=1&co1=1&m3=1&incldead=0";
+    private static final String SEARCH_URL = "https://hdbits.org/browse.php?descriptions=0&c2=1&co1=1&co4=1&m3=1&m6=1&incldead=0";
     private static final String LINK_URL = "https://hdbits.org/download.php/%s?id=%d&passkey=%s";
 
     private static final Pattern URL_ID_REGEX = Pattern.compile("id=(\\d+)", Pattern.CASE_INSENSITIVE);
+    private static final Logger LOG = LoggerFactory.getLogger(HDBitsParser.class);
 
     private final int uid;
     private final String pass;
@@ -72,8 +75,10 @@ public class HDBitsParser extends SearchParser {
         final Elements rows = doc.select("#torrent-list").select("tr");
         for (Element row : rows) {
             final SearchItem item = this.parseItem(row);
-            if (item == null)
+            if (item == null) {
+                LOG.trace("Failed to parse row: {}", row);
                 continue;
+            }
 
             items.add(item);
         }
