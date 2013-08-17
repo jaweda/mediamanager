@@ -4,6 +4,7 @@ import com.github.junrar.Archive;
 import com.github.junrar.exception.RarException;
 import com.github.junrar.rarfile.FileHeader;
 import com.google.common.collect.ImmutableSet;
+import com.jamierf.mediamanager.db.FileDatabase;
 import com.jamierf.mediamanager.managers.DownloadDirManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,10 +26,12 @@ public class RarFileHandler implements FileTypeHandler {
 
     protected final File destDir;
     protected final boolean delete;
+    private final FileDatabase files;
 
-    public RarFileHandler(File destDir, boolean delete) {
+    public RarFileHandler(File destDir, boolean delete, FileDatabase files) {
         this.destDir = destDir;
         this.delete = delete;
+        this.files = files;
 
         if (!destDir.exists())
             destDir.mkdirs();
@@ -37,10 +40,10 @@ public class RarFileHandler implements FileTypeHandler {
 	@Override
 	public Collection<String> getHandledExtensions() {
 		return EXTENSIONS;
-	}
+    }
 
-    protected boolean acceptContainedFile(String path) {
-        return true;
+    protected boolean acceptContainedFile(String path) throws IOException {
+        return !files.isHandled(path);
     }
 
     protected File getDestinationFile(String path) {
@@ -52,6 +55,7 @@ public class RarFileHandler implements FileTypeHandler {
 
         try {
             archive.extractFile(fileHeader, out);
+            files.addHandled(fileHeader.getFileNameString());
             return true;
         }
         catch (RarException e) {

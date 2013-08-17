@@ -15,6 +15,7 @@ import com.yammer.dropwizard.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Random;
@@ -86,29 +87,34 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
             return;
         }
 
-        final Collection<Episode> episodes = shows.getDesiredEpisodes();
-        if (episodes.isEmpty()) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("Skipping backfill, we have all desired episodes");
+        try {
+            final Collection<Episode> episodes = shows.getDesiredEpisodes();
+            if (episodes.isEmpty()) {
+                if (LOG.isDebugEnabled())
+                    LOG.debug("Skipping backfill, we have all desired episodes");
 
-            return;
+                return;
+            }
+
+            if (LOG.isInfoEnabled())
+                LOG.info("Starting a backfill for {} episodes", episodes.size());
+
+            final int throttleDelayMS = (int) THROTTLE_DELAY.toMilliseconds();
+            for (Episode episode : episodes) {
+                try {
+                    this.search(episode.getName());
+
+                    // sleep for a delay around THROTTLE_DELAY, +/- 50%
+                    final long delay = throttleDelayMS - (throttleDelayMS / 2) + random.nextInt(throttleDelayMS);
+                    Thread.sleep(delay);
+                }
+                catch (Exception e) {
+                    LOG.error("Failed searching for episode: " + episode.getName(), e);
+                }
+            }
         }
-
-        if (LOG.isInfoEnabled())
-            LOG.info("Starting a backfill for {} episodes", episodes.size());
-
-        final int throttleDelayMS = (int) THROTTLE_DELAY.toMilliseconds();
-        for (Episode episode : episodes) {
-            try {
-                this.search(episode.getName());
-
-                // sleep for a delay around THROTTLE_DELAY, +/- 50%
-                final long delay = throttleDelayMS - (throttleDelayMS / 2) + random.nextInt(throttleDelayMS);
-                Thread.sleep(delay);
-            }
-            catch (Exception e) {
-                LOG.error("Failed searching for episode: " + episode.getName(), e);
-            }
+        catch (IOException e) {
+            LOG.error("Failed to fetch list of desired episodes", e);
         }
     }
 

@@ -2,6 +2,7 @@ package com.jamierf.mediamanager.handler;
 
 import com.github.junrar.Archive;
 import com.github.junrar.rarfile.FileHeader;
+import com.jamierf.mediamanager.db.FileDatabase;
 import com.jamierf.mediamanager.listeners.MediaFileListener;
 
 import java.io.File;
@@ -11,20 +12,20 @@ public class MediaRarFileHandler extends RarFileHandler {
 
     private final MediaFileListener listener;
 
-    public MediaRarFileHandler(File destDir, boolean delete, MediaFileListener listener) {
-        super(destDir, delete);
+    public MediaRarFileHandler(File destDir, boolean delete, MediaFileListener listener, FileDatabase files) {
+        super(destDir, delete, files);
 
         this.listener = listener;
     }
 
     @Override
-    protected boolean acceptContainedFile(String path) {
+    protected boolean acceptContainedFile(String path) throws IOException {
         // Check our parent class will accept the file
         if (!super.acceptContainedFile(path))
             return false;
 
         // Check the Media file handler will accept the file
-        if (!MediaFileHandler.acceptFile(path))
+        if (!MediaFileHandler.acceptFileExtension(path))
             return false;
 
         return true;

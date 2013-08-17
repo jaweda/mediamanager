@@ -10,6 +10,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class ShowsResource {
 
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public View getShowsDatabase() {
+    public View getShowsDatabase() throws IOException {
         final List<Episode> episodes = Lists.newArrayList(shows.getAllEpisodes());
         Collections.sort(episodes);
 

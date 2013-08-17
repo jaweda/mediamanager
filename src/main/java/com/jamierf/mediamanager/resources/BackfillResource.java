@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 
 @Path("/backfill")
 public class BackfillResource {
@@ -38,7 +39,7 @@ public class BackfillResource {
     @POST
     @Path("/enqueue")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response enqueue(@FormParam("query") String query) {
+    public Response enqueue(@FormParam("query") String query) throws IOException {
         final Episode.Name name = episodeNameParser.parseFilename(query);
         if (name == null)
             return Response.status(Response.Status.BAD_REQUEST).entity("Failed to parse requested episode name").build();

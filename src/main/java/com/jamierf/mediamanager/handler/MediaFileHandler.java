@@ -2,6 +2,7 @@ package com.jamierf.mediamanager.handler;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
+import com.jamierf.mediamanager.db.FileDatabase;
 import com.jamierf.mediamanager.listeners.MediaFileListener;
 import com.jamierf.mediamanager.managers.DownloadDirManager;
 import org.slf4j.Logger;
@@ -17,7 +18,7 @@ public class MediaFileHandler implements FileTypeHandler {
 	private static final ImmutableSet<String> EXTENSIONS = ImmutableSet.of("avi", "mkv", "mp4", "divx");
     private static final Pattern MEDIA_REJECT_PATTERN = Pattern.compile("\\bsample\\b", Pattern.CASE_INSENSITIVE);
 
-    public static boolean acceptFile(String path) {
+    public static boolean acceptFileExtension(String path) {
         final String extension = DownloadDirManager.getFileExtension(path);
         return EXTENSIONS.contains(extension) && !MEDIA_REJECT_PATTERN.matcher(path).find();
     }
@@ -27,11 +28,13 @@ public class MediaFileHandler implements FileTypeHandler {
     private final File destDir;
     private final boolean move;
     private final MediaFileListener listener;
+    private final FileDatabase files;
 
-    public MediaFileHandler(File destDir, boolean move, MediaFileListener listener) {
+    public MediaFileHandler(File destDir, boolean move, MediaFileListener listener, FileDatabase files) {
         this.destDir = destDir;
         this.move = move;
         this.listener = listener;
+        this.files = files;
 
         if (!destDir.exists())
             destDir.mkdirs();
@@ -42,10 +45,17 @@ public class MediaFileHandler implements FileTypeHandler {
 		return EXTENSIONS;
 	}
 
+    protected boolean acceptFile(String path) throws IOException {
+        if (!MediaFileHandler.acceptFileExtension(path))
+            return false;
+
+        return !files.isHandled(path);
+    }
+
 	@Override
 	public void handleFile(String relativePath, File file) throws IOException {
         // Only accept certain files
-        if (!MediaFileHandler.acceptFile(file.getName())) {
+        if (!this.acceptFile(file.getName())) {
             // If we were passed the file but didn't accept it then delete it
 
             if (LOG.isDebugEnabled())
@@ -78,5 +88,6 @@ public class MediaFileHandler implements FileTypeHandler {
 		}
 
         listener.onNewItem(destFile);
+        files.addHandled(file.getName());
 	}
 }

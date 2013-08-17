@@ -1,5 +1,6 @@
 package com.jamierf.mediamanager.listeners;
 
+import com.google.common.base.Optional;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.downloader.Downloader;
 import com.jamierf.mediamanager.models.Episode;
@@ -10,6 +11,7 @@ import com.jamierf.mediamanager.parsing.ItemListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Set;
 
 public class DownloadableItemListener implements ItemListener<DownloadableItem> {
@@ -28,13 +30,12 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
         this.episodeNameParser = episodeNameParser;
     }
 
-    private Episode getEpisode(Episode.Name name) {
+    private Optional<Episode> getEpisode(Episode.Name name) {
         try {
             return shows.get(name);
-        }
-        catch (Exception e) {
-            LOG.error("Failed to fetch episode from database", e);
-            return null;
+        } catch (IOException e) {
+            LOG.warn("Failed to fetch episode: " + name, e);
+            return Optional.absent();
         }
     }
 
@@ -43,7 +44,11 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
         episode = episode.copyWithState(State.PENDING);
 
         // Update the database
-        shows.addOrUpdate(episode);
+        try {
+            shows.addOrUpdate(episode);
+        } catch (IOException e) {
+            LOG.error("Error updating episode: " + episode, e);
+        }
     }
 
     @Override
@@ -57,8 +62,8 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
         }
 
         // Check if it is a desired episode
-        final Episode episode = this.getEpisode(name);
-        if (episode == null || !episode.isDesired()) {
+        final Optional<Episode> episode = this.getEpisode(name);
+        if (!episode.isPresent() || !episode.get().isDesired()) {
             if (LOG.isTraceEnabled())
                 LOG.trace("Skipping {}, not desired", name);
 
@@ -91,7 +96,7 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
 
         try {
             // Mark the episode as pending so we no longer desire it
-            this.updateEpisode(episode);
+            this.updateEpisode(episode.get());
         }
         catch (Exception e) {
             LOG.error("Failed to update episode in database", e);

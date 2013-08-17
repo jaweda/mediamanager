@@ -1,7 +1,9 @@
 package com.jamierf.mediamanager;
 
 import com.jamierf.mediamanager.config.*;
+import com.jamierf.mediamanager.db.BDBFileDatabase;
 import com.jamierf.mediamanager.db.BDBShowDatabase;
+import com.jamierf.mediamanager.db.FileDatabase;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.downloader.Downloader;
 import com.jamierf.mediamanager.downloader.WatchDirDownloader;
@@ -55,6 +57,10 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
 
     private static ShowDatabase buildShowDatabase(DatabaseConfiguration config) {
         return new BDBShowDatabase(config);
+    }
+
+    private static FileDatabase buildFileDatabase(DatabaseConfiguration config) {
+        return new BDBFileDatabase(config);
     }
 
     private static DownloadableItemListener buildDownloadableListener(TorrentConfiguration config, ShowDatabase shows, Downloader downloader, EpisodeNameParser episodeNameParser) {
@@ -119,7 +125,7 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         return torrentFeed;
     }
 
-    private static DownloadDirManager buildDownloadDirManager(FileConfiguration config, MediaFileListener mediaListener) throws IOException {
+    private static DownloadDirManager buildDownloadDirManager(FileConfiguration config, MediaFileListener mediaListener, FileDatabase files) throws IOException {
         final DownloadDirManager downloadDirManager = new DownloadDirManager(config);
 
         final File tempDir = config.getTempDir();
@@ -131,8 +137,8 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
             tempDir.mkdirs();
         }
 
-        downloadDirManager.addFileTypeHandler(new MediaRarFileHandler(tempDir, config.isDeleteOriginals(), mediaListener));
-        downloadDirManager.addFileTypeHandler(new MediaFileHandler(tempDir, config.isDeleteOriginals(), mediaListener));
+        downloadDirManager.addFileTypeHandler(new MediaRarFileHandler(tempDir, config.isDeleteOriginals(), mediaListener, files));
+        downloadDirManager.addFileTypeHandler(new MediaFileHandler(tempDir, config.isDeleteOriginals(), mediaListener, files));
 
         // Handle garbage files (only if we want to delete originals)!
         if (config.isDeleteOriginals()) {
@@ -162,6 +168,10 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         final ShowDatabase shows = MediaManager.buildShowDatabase(config.getDatabaseConfiguration());
         env.manage(shows);
 
+        // Initialise the shows database - this stores what files have already been handled
+        final FileDatabase files = MediaManager.buildFileDatabase(config.getDatabaseConfiguration());
+        env.manage(files);
+
         // Initialise the torrent file manager - this is responsible for taking a torrent file URL and downloading the torrent contents
         final Downloader torrentFileManager = MediaManager.buildTorrentFileManager(config.getTorrentConfiguration(), clientFactory.build(), retryManager);
         env.manage(torrentFileManager);
@@ -187,7 +197,7 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         env.manage(torrentFeedManager);
 
         // Initialise the download dir manager - this listens for new files in the download directory and moves the wanted ones to a specified directory
-		final DownloadDirManager downloadDirManager = MediaManager.buildDownloadDirManager(config.getFileConfiguration(), mediaListener);
+		final DownloadDirManager downloadDirManager = MediaManager.buildDownloadDirManager(config.getFileConfiguration(), mediaListener, files);
         env.manage(downloadDirManager);
 
         // Add a filter to redirect favicon to the static assets directory

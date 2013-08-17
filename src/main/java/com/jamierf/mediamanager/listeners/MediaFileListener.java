@@ -1,5 +1,6 @@
 package com.jamierf.mediamanager.listeners;
 
+import com.google.common.base.Optional;
 import com.google.common.io.Files;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.models.Episode;
@@ -58,10 +59,10 @@ public class MediaFileListener implements ItemListener<File> {
         if (name == null)
             return null;
 
-        final Episode episode = shows.get(name);
+        final Optional<Episode> episode = shows.get(name);
         // The episode already exists, make a copy and mark it as existing
-        if (episode != null)
-            return episode.copyWithState(State.EXISTS);
+        if (episode.isPresent())
+            return episode.get().copyWithState(State.EXISTS);
 
         return new Episode(name, State.EXISTS);
     }
