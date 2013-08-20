@@ -9,7 +9,11 @@ import com.jamierf.mediamanager.models.Episode;
 import java.io.IOException;
 import java.util.Collection;
 
-public class BDBShowDatabase extends BDBDatabase<Episode.Name, Episode> implements ShowDatabase {
+public class BDBShowDatabase extends BDBDatabase<String, Episode> implements ShowDatabase {
+
+    private static String createKey(Episode.Name name) {
+        return name.toString();
+    }
 
     public BDBShowDatabase(DatabaseConfiguration config) {
         super (config.getFile("file"), "shows.db", Episode.class);
@@ -17,16 +21,19 @@ public class BDBShowDatabase extends BDBDatabase<Episode.Name, Episode> implemen
 
     @Override
     public boolean addOrUpdate(Episode episode) throws IOException {
-        return this.addOrUpdate(episode.getName(), episode);
+        final String key = BDBShowDatabase.createKey(episode.getName());
+        return this.addOrUpdate(key, episode);
     }
 
     @Override
     public boolean addIfNotExists(Episode episode) throws IOException {
-        return this.addIfNotExists(episode.getName(), episode);
+        final String key = BDBShowDatabase.createKey(episode.getName());
+        return this.addIfNotExists(key, episode);
     }
 
     @Override
-    public Optional<Episode> get(Episode.Name key) throws IOException {
+    public Optional<Episode> get(Episode.Name name) throws IOException {
+        final String key = BDBShowDatabase.createKey(name);
         return super.get(key);
     }
 

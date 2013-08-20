@@ -29,6 +29,7 @@ public class DirMonitor {
 	private final Collection<FileListener> listeners;
 
 	private final ExecutorService bossPool;
+    private final ExecutorService workerPool;
 
 	public DirMonitor(File file) throws IOException {
 		this (file, null);
@@ -48,6 +49,7 @@ public class DirMonitor {
 		listeners = Lists.newLinkedList();
 
 		bossPool = Executors.newSingleThreadExecutor();
+		workerPool = Executors.newSingleThreadExecutor();
 
 		root.register(watcher, StandardWatchEventKinds.ENTRY_CREATE);
 	}
@@ -75,7 +77,12 @@ public class DirMonitor {
 			}
 		});
 
-		this.processDirectory(root.toFile());
+        workerPool.execute(new Runnable() {
+            @Override
+            public void run() {
+		        processDirectory(root.toFile());
+            }
+        });
 	}
 
 	public void stop() {
