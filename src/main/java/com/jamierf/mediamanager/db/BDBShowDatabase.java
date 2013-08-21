@@ -3,9 +3,9 @@ package com.jamierf.mediamanager.db;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import com.jamierf.mediamanager.config.DatabaseConfiguration;
 import com.jamierf.mediamanager.models.Episode;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
@@ -15,8 +15,8 @@ public class BDBShowDatabase extends BDBDatabase<String, Episode> implements Sho
         return name.toString();
     }
 
-    public BDBShowDatabase(DatabaseConfiguration config) {
-        super (config.getFile("file"), "shows.db", Episode.class);
+    public BDBShowDatabase(File file) {
+        super (file, "shows.db", Episode.class);
     }
 
     @Override

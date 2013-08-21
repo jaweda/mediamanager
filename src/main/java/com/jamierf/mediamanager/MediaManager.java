@@ -56,11 +56,11 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
 	}
 
     private static ShowDatabase buildShowDatabase(DatabaseConfiguration config) {
-        return new BDBShowDatabase(config);
+        return new BDBShowDatabase(config.getFile("file"));
     }
 
     private static FileDatabase buildFileDatabase(DatabaseConfiguration config) {
-        return new BDBFileDatabase(config);
+        return new BDBFileDatabase(config.getFile("file"));
     }
 
     private static DownloadableItemListener buildDownloadableListener(TorrentConfiguration config, ShowDatabase shows, Downloader downloader, EpisodeNameParser episodeNameParser) {

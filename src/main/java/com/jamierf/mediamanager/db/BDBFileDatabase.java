@@ -1,13 +1,12 @@
 package com.jamierf.mediamanager.db;
 
-import com.jamierf.mediamanager.config.DatabaseConfiguration;
-
+import java.io.File;
 import java.io.IOException;
 
 public class BDBFileDatabase extends BDBDatabase<String, Boolean> implements FileDatabase {
 
-    public BDBFileDatabase(DatabaseConfiguration config) {
-        super (config.getFile("file"), "file.db", Boolean.class);
+    public BDBFileDatabase(File file) {
+        super (file, "file.db", Boolean.class);
     }
 
     @Override
