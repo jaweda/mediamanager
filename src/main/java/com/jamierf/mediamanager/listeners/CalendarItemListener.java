@@ -3,6 +3,7 @@ package com.jamierf.mediamanager.listeners;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.managers.BackfillManager;
 import com.jamierf.mediamanager.models.Episode;
+import com.jamierf.mediamanager.models.Name;
 import com.jamierf.mediamanager.models.State;
 import com.jamierf.mediamanager.parsing.EpisodeNameParser;
 import com.jamierf.mediamanager.parsing.ItemListener;
@@ -26,7 +27,7 @@ public class CalendarItemListener implements ItemListener<CalendarItem> {
 
     @Override
     public void onNewItem(CalendarItem item) {
-        final Episode.Name name = episodeNameParser.parseCalendarSummary(item.getSummary());
+        final Name name = episodeNameParser.parseCalendarSummary(item.getSummary());
         if (name == null) {
             if (LOG.isTraceEnabled())
                 LOG.trace("Failed to parse episode title: " + item.getSummary());

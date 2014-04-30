@@ -13,7 +13,7 @@
         <jsoup.version>1.7.1</jsoup.version>
         <ical4j.version>1.0.4</ical4j.version>
         <reflections.version>0.9.8</reflections.version>
-        <bdb.version>4.0.92</bdb.version>
+        <azure-table.version>1.2.0</azure-table.version>
         <commons.io.version>2.1</commons.io.version>
         <commons.lang.version>2.6</commons.lang.version>
         <junit.version>4.11</junit.version>
@@ -84,6 +84,11 @@
             <version>${dropwizard.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.yammer.collections.azure</groupId>
+            <artifactId>azure-table-util</artifactId>
+            <version>${azure-table.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.yammer.dropwizard</groupId>
             <artifactId>dropwizard-client</artifactId>
             <version>${dropwizard.version}</version>
@@ -127,11 +132,6 @@
             <groupId>org.mnode.ical4j</groupId>
             <artifactId>ical4j</artifactId>
             <version>${ical4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sleepycat</groupId>
-            <artifactId>je</artifactId>
-            <version>${bdb.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>

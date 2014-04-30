@@ -2,7 +2,8 @@ package com.jamierf.mediamanager.parsing;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.jamierf.mediamanager.models.Episode;
+import com.jamierf.mediamanager.models.Name;
+import com.jamierf.mediamanager.models.NameAndQuality;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 
@@ -54,7 +55,7 @@ public class EpisodeNameParser {
         this.aliases = builder.build();
     }
 
-    public Episode.Name parseFilename(String filename) {
+    public NameAndQuality parseFilename(String filename) {
 		for (Pattern regex : EPISODE_TITLE_REGEXS) {
 			final Matcher matcher = regex.matcher(filename);
 			if (!matcher.find())
@@ -68,13 +69,16 @@ public class EpisodeNameParser {
 			final int episode = Integer.parseInt(matcher.group(index++));
 			final String quality = this.parseQuality(matcher.group(index++));
 
-			return new Episode.Name(title, season, episode, quality);
+			return new NameAndQuality(
+                    new Name(title, season, episode),
+                    quality
+            );
 		}
 
 		return null;
 	}
 
-    public Episode.Name parseCalendarSummary(String summary) {
+    public Name parseCalendarSummary(String summary) {
         final Matcher matcher = CALENDAR_SUMMARY_REGEX.matcher(summary);
         if (!matcher.find())
             return null;
@@ -85,7 +89,7 @@ public class EpisodeNameParser {
         final int season = Integer.parseInt(matcher.group(index++));
         final int episode = Integer.parseInt(matcher.group(index++));
 
-        return new Episode.Name(title, season, episode, null);
+        return new Name(title, season, episode);
     }
 
     private String parseTitle(String title) {

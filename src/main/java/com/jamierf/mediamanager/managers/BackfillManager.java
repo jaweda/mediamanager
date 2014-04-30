@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.models.Episode;
+import com.jamierf.mediamanager.models.Name;
 import com.jamierf.mediamanager.parsing.ItemListener;
 import com.jamierf.mediamanager.parsing.search.SearchItem;
 import com.jamierf.mediamanager.parsing.search.SearchParser;
@@ -118,7 +119,7 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
         }
     }
 
-    public void search(Episode.Name name) {
+    public void search(Name name) {
         final String query = name.toString();
 
         if (LOG.isDebugEnabled())

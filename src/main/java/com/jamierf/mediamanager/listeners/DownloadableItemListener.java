@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.downloader.Downloader;
 import com.jamierf.mediamanager.models.Episode;
+import com.jamierf.mediamanager.models.Name;
+import com.jamierf.mediamanager.models.NameAndQuality;
 import com.jamierf.mediamanager.models.State;
 import com.jamierf.mediamanager.parsing.DownloadableItem;
 import com.jamierf.mediamanager.parsing.EpisodeNameParser;
@@ -30,7 +32,7 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
         this.episodeNameParser = episodeNameParser;
     }
 
-    private Optional<Episode> getEpisode(Episode.Name name) {
+    private Optional<Episode> getEpisode(Name name) {
         try {
             return shows.get(name);
         } catch (IOException e) {
@@ -53,8 +55,8 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
 
     @Override
     public synchronized void onNewItem(DownloadableItem item) {
-        final Episode.Name name = episodeNameParser.parseFilename(item.getTitle());
-        if (name == null) {
+        final NameAndQuality nameAndQuality = episodeNameParser.parseFilename(item.getTitle());
+        if (nameAndQuality == null) {
             if (LOG.isTraceEnabled())
                 LOG.trace("Failed to parse episode title: " + item.getTitle());
 
@@ -62,18 +64,18 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
         }
 
         // Check if it is a desired episode
-        final Optional<Episode> episode = this.getEpisode(name);
+        final Optional<Episode> episode = this.getEpisode(nameAndQuality.getName());
         if (!episode.isPresent() || !episode.get().isDesired()) {
             if (LOG.isTraceEnabled())
-                LOG.trace("Skipping {}, not desired", name);
+                LOG.trace("Skipping {}, not desired", nameAndQuality);
 
             return;
         }
 
         // Check it is a desired quality
-        if (!desiredQualities.contains(name.getQuality())) {
+        if (!desiredQualities.contains(nameAndQuality.getQuality())) {
             if (LOG.isTraceEnabled())
-                LOG.trace("Skipping torrent {}, quality {}, desired {}", name, name.getQuality(), desiredQualities);
+                LOG.trace("Skipping torrent {}, desired quality {}", nameAndQuality, desiredQualities);
 
             return;
         }
@@ -81,7 +83,7 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
         // This is an episode we want!
 
         if (LOG.isInfoEnabled())
-            LOG.info("Downloading torrent {}", name);
+            LOG.info("Downloading torrent {}", nameAndQuality);
 
         try {
             // Download the torrent file

@@ -11,6 +11,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.HttpMethod;
 import java.io.UnsupportedEncodingException;
@@ -27,6 +29,7 @@ public class SCCParser extends SearchParser {
     private static final String LINK_URL = "https://sceneaccess.eu/download/%d/%s/%s";
 
     private static final Pattern URL_ID_REGEX = Pattern.compile("id=(\\d+)", Pattern.CASE_INSENSITIVE);
+    private static final Logger LOG = LoggerFactory.getLogger(SCCParser.class);
 
     private final int uid;
     private final String pass;
@@ -69,8 +72,9 @@ public class SCCParser extends SearchParser {
         final Elements rows = doc.select("#torrents-table").select("tr");
         for (Element row : rows) {
             final SearchItem item = this.parseItem(row);
-            if (item == null)
+            if (item == null) {
                 continue;
+            }
 
             items.add(item);
         }
@@ -87,8 +91,10 @@ public class SCCParser extends SearchParser {
         final String name = title.text();
 
         final Matcher matcher = URL_ID_REGEX.matcher(title.attr("href"));
-        if (!matcher.find())
+        if (!matcher.find()) {
+            LOG.trace("Failed to parse row: {}", e);
             return null;
+        }
 
         final int id = Integer.parseInt(matcher.group(1));
         final URI link = this.createLink(name, id);

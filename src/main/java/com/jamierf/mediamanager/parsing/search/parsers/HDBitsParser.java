@@ -76,7 +76,6 @@ public class HDBitsParser extends SearchParser {
         for (Element row : rows) {
             final SearchItem item = this.parseItem(row);
             if (item == null) {
-                LOG.trace("Failed to parse row: {}", row);
                 continue;
             }
 
@@ -95,8 +94,10 @@ public class HDBitsParser extends SearchParser {
         final String name = title.text();
 
         final Matcher matcher = URL_ID_REGEX.matcher(title.attr("href"));
-        if (!matcher.find())
+        if (!matcher.find()) {
+            LOG.trace("Failed to parse row: {}", e);
             return null;
+        }
 
         final int id = Integer.parseInt(matcher.group(1));
         final URI link = this.createLink(name, id);

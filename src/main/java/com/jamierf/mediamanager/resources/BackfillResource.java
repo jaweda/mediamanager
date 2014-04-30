@@ -3,6 +3,8 @@ package com.jamierf.mediamanager.resources;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.managers.BackfillManager;
 import com.jamierf.mediamanager.models.Episode;
+import com.jamierf.mediamanager.models.Name;
+import com.jamierf.mediamanager.models.NameAndQuality;
 import com.jamierf.mediamanager.models.State;
 import com.jamierf.mediamanager.parsing.EpisodeNameParser;
 import com.jamierf.mediamanager.views.BackfillForm;
@@ -40,12 +42,15 @@ public class BackfillResource {
     @Path("/enqueue")
     @Produces(MediaType.TEXT_PLAIN)
     public Response enqueue(@FormParam("query") String query) throws IOException {
-        final Episode.Name name = episodeNameParser.parseFilename(query);
-        if (name == null)
+        final NameAndQuality nameAndQuality = episodeNameParser.parseFilename(query);
+        if (nameAndQuality == null) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Failed to parse requested episode name").build();
+        }
 
-        if (LOG.isInfoEnabled())
+        final Name name = nameAndQuality.getName();
+        if (LOG.isInfoEnabled()) {
             LOG.info("Marking episode {} for backfill", name);
+        }
 
         final Episode episode = new Episode(name, State.DESIRED);
         if (!shows.addOrUpdate(episode)) // If already in DB overwrite since we specifically requested

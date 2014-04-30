@@ -1,10 +1,10 @@
 package com.jamierf.mediamanager;
 
 import com.jamierf.mediamanager.config.*;
-import com.jamierf.mediamanager.db.BDBFileDatabase;
-import com.jamierf.mediamanager.db.BDBShowDatabase;
 import com.jamierf.mediamanager.db.FileDatabase;
 import com.jamierf.mediamanager.db.ShowDatabase;
+import com.jamierf.mediamanager.db.azure.AzureTableFileDatabase;
+import com.jamierf.mediamanager.db.azure.AzureTableShowDatabase;
 import com.jamierf.mediamanager.downloader.Downloader;
 import com.jamierf.mediamanager.downloader.WatchDirDownloader;
 import com.jamierf.mediamanager.handler.GarbageFileHandler;
@@ -33,6 +33,7 @@ import com.jamierf.mediamanager.parsing.search.SearchParser;
 import com.jamierf.mediamanager.resources.BackfillResource;
 import com.jamierf.mediamanager.resources.MediaManagerResource;
 import com.jamierf.mediamanager.resources.ShowsResource;
+import com.microsoft.windowsazure.services.core.storage.StorageException;
 import com.sun.jersey.api.client.Client;
 import com.yammer.dropwizard.Service;
 import com.yammer.dropwizard.assets.AssetsBundle;
@@ -55,12 +56,12 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         new MediaManager().run(args);
 	}
 
-    private static ShowDatabase buildShowDatabase(DatabaseConfiguration config) {
-        return new BDBShowDatabase(config.getFile("file"));
+    private static ShowDatabase buildShowDatabase(DatabaseConfiguration config) throws StorageException {
+        return new AzureTableShowDatabase(config.getString("accountName"), config.getString("accountKey"));
     }
 
-    private static FileDatabase buildFileDatabase(DatabaseConfiguration config) {
-        return new BDBFileDatabase(config.getFile("file"));
+    private static FileDatabase buildFileDatabase(DatabaseConfiguration config) throws StorageException {
+        return new AzureTableFileDatabase(config.getString("accountName"), config.getString("accountKey"));
     }
 
     private static DownloadableItemListener buildDownloadableListener(TorrentConfiguration config, ShowDatabase shows, Downloader downloader, EpisodeNameParser episodeNameParser) {
@@ -176,6 +177,7 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         final Downloader torrentFileManager = MediaManager.buildTorrentFileManager(config.getTorrentConfiguration(), clientFactory.build(), retryManager);
         env.manage(torrentFileManager);
 
+        // Initialise the episode name parser - this parses filenames and torrent titles in to an episode name, number, season number, and quality
         final EpisodeNameParser episodeNameParser = new EpisodeNameParser(config.getAliases());
 
         // Initialise the downloadable item listener - this listens for downloadable items and passes them to the torrent file manager

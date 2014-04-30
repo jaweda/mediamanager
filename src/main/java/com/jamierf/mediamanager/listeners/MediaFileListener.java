@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 import com.google.common.io.Files;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.models.Episode;
+import com.jamierf.mediamanager.models.Name;
+import com.jamierf.mediamanager.models.NameAndQuality;
 import com.jamierf.mediamanager.models.State;
 import com.jamierf.mediamanager.parsing.EpisodeNameParser;
 import com.jamierf.mediamanager.parsing.ItemListener;
@@ -17,7 +19,7 @@ public class MediaFileListener implements ItemListener<File> {
 
     private static final Logger LOG = LoggerFactory.getLogger(MediaFileListener.class);
 
-    private static String getEpisodePath(Episode.Name name, String originalPath) {
+    private static String getEpisodePath(Name name, String originalPath) {
         final StringBuilder builder = new StringBuilder();
 
         builder.append(name.getTitle());
@@ -54,17 +56,19 @@ public class MediaFileListener implements ItemListener<File> {
     }
 
     private Episode getEpisode(String filename) throws Exception {
-        final Episode.Name name = episodeNameParser.parseFilename(filename);
+        final NameAndQuality nameAndQuality = episodeNameParser.parseFilename(filename);
         // We cannot parse this name, so we cannot do anything with it...
-        if (name == null)
+        if (nameAndQuality == null) {
             return null;
+        }
 
-        final Optional<Episode> episode = shows.get(name);
+        final Optional<Episode> episode = shows.get(nameAndQuality.getName());
         // The episode already exists, make a copy and mark it as existing
-        if (episode.isPresent())
+        if (episode.isPresent()) {
             return episode.get().copyWithState(State.EXISTS);
+        }
 
-        return new Episode(name, State.EXISTS);
+        return new Episode(nameAndQuality.getName(), State.EXISTS);
     }
 
     @Override
