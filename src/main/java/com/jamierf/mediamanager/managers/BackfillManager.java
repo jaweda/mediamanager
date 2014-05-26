@@ -11,8 +11,8 @@ import com.jamierf.mediamanager.parsing.search.SearchItem;
 import com.jamierf.mediamanager.parsing.search.SearchParser;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.UniformInterfaceException;
-import com.yammer.dropwizard.lifecycle.Managed;
-import com.yammer.dropwizard.util.Duration;
+import io.dropwizard.lifecycle.Managed;
+import io.dropwizard.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

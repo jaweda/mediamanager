@@ -2,7 +2,7 @@ package com.jamierf.mediamanager.config;
 
 import com.google.common.collect.ImmutableSet;
 import com.jamierf.mediamanager.io.retry.JerseyRetryManager;
-import com.yammer.dropwizard.util.Duration;
+import io.dropwizard.util.Duration;
 
 public class RetryConfiguration {
 

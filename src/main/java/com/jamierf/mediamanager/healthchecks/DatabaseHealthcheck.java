@@ -1,15 +1,13 @@
 package com.jamierf.mediamanager.healthchecks;
 
+import com.codahale.metrics.health.HealthCheck;
 import com.jamierf.mediamanager.db.ShowDatabase;
-import com.yammer.metrics.core.HealthCheck;
 
 public class DatabaseHealthcheck extends HealthCheck {
 
     private final ShowDatabase shows;
 
     public DatabaseHealthcheck(ShowDatabase shows) {
-        super("database");
-
         this.shows = shows;
     }
 

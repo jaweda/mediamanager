@@ -35,20 +35,22 @@ import com.jamierf.mediamanager.resources.MediaManagerResource;
 import com.jamierf.mediamanager.resources.ShowsResource;
 import com.microsoft.windowsazure.services.core.storage.StorageException;
 import com.sun.jersey.api.client.Client;
-import com.yammer.dropwizard.Service;
-import com.yammer.dropwizard.assets.AssetsBundle;
-import com.yammer.dropwizard.client.JerseyClientBuilder;
-import com.yammer.dropwizard.config.Bootstrap;
-import com.yammer.dropwizard.config.Environment;
-import com.yammer.dropwizard.views.ViewBundle;
+import io.dropwizard.Application;
+import io.dropwizard.assets.AssetsBundle;
+import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
+import io.dropwizard.views.ViewBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.DispatcherType;
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.Map;
 
-public class MediaManager extends Service<MediaManagerConfiguration> {
+public class MediaManager extends Application<MediaManagerConfiguration> {
 
     private static final Logger LOG = LoggerFactory.getLogger(MediaManager.class);
 
@@ -89,7 +91,7 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
     }
 
     private static FeedManager<CalendarItem> buildCalendarFeedManager(CalendarConfiguration config, ShowDatabase shows, BackfillManager backfillManager, Client client, RetryManager retryManager, EpisodeNameParser episodeNameParser) throws ClassNotFoundException {
-        final FeedManager<CalendarItem> calendarFeed = new FeedManager(config.getUpdateDelay());
+        final FeedManager<CalendarItem> calendarFeed = new FeedManager<>(config.getUpdateDelay());
         final CalendarItemListener calendarListener = new CalendarItemListener(shows, backfillManager, episodeNameParser);
 
         calendarFeed.addListener(calendarListener);
@@ -111,7 +113,7 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
     }
 
     private static FeedManager<RSSItem> buildTorrentFeedManager(TorrentConfiguration config, DownloadableItemListener downloadableItemListener, Client client, RetryManager retryManager) throws ClassNotFoundException {
-        final FeedManager<RSSItem> torrentFeed = new FeedManager(config.getUpdateDelay());
+        final FeedManager<RSSItem> torrentFeed = new FeedManager<>(config.getUpdateDelay());
         torrentFeed.addListener(new DownloadableItemListenerProxy<RSSItem>(downloadableItemListener));
 
         // Load in all configured torrent parsers
@@ -161,21 +163,21 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
     }
 
     @Override
-    public void run(MediaManagerConfiguration config, Environment env) throws Exception {
-        final JerseyClientBuilder clientFactory = new JerseyClientBuilder().using(env).using(config.getHttpClientConfiguration());
+    public void run(MediaManagerConfiguration config, Environment environment) throws Exception {
+        final JerseyClientBuilder clientFactory = new JerseyClientBuilder(environment).using(config.getHttpClientConfiguration());
         final RetryManager retryManager = new DelayedJerseyRetryManager(MediaManager.class, config.getRetryConfiguration());
 
         // Initialise the shows database - this stores what episodes we should be watching for
         final ShowDatabase shows = MediaManager.buildShowDatabase(config.getDatabaseConfiguration());
-        env.manage(shows);
+        environment.lifecycle().manage(shows);
 
         // Initialise the shows database - this stores what files have already been handled
         final FileDatabase files = MediaManager.buildFileDatabase(config.getDatabaseConfiguration());
-        env.manage(files);
+        environment.lifecycle().manage(files);
 
         // Initialise the torrent file manager - this is responsible for taking a torrent file URL and downloading the torrent contents
-        final Downloader torrentFileManager = MediaManager.buildTorrentFileManager(config.getTorrentConfiguration(), clientFactory.build(), retryManager);
-        env.manage(torrentFileManager);
+        final Downloader torrentFileManager = MediaManager.buildTorrentFileManager(config.getTorrentConfiguration(), clientFactory.build("file"), retryManager);
+        environment.lifecycle().manage(torrentFileManager);
 
         // Initialise the episode name parser - this parses filenames and torrent titles in to an episode name, number, season number, and quality
         final EpisodeNameParser episodeNameParser = new EpisodeNameParser(config.getAliases());
@@ -187,31 +189,32 @@ public class MediaManager extends Service<MediaManagerConfiguration> {
         final MediaFileListener mediaListener = MediaManager.buildMediaListener(shows, config.getFileConfiguration(), episodeNameParser);
 
         // Initialise the backfill manager - this searches for missing episodes on demand
-        final BackfillManager backfillManager = MediaManager.buildBackfillManager(config.getTorrentConfiguration(), shows, downloadableListener, clientFactory.build(), retryManager);
-        env.manage(backfillManager);
+        final BackfillManager backfillManager = MediaManager.buildBackfillManager(config.getTorrentConfiguration(), shows, downloadableListener, clientFactory.build("backfill"), retryManager);
+        environment.lifecycle().manage(backfillManager);
 
         // Initialise the calendar feed manager - this periodically parses the known calendar feeds to look for new episodes we want to watch for
-        final FeedManager<CalendarItem> calendarFeedManager = MediaManager.buildCalendarFeedManager(config.getCalendarConfiguration(), shows, backfillManager, clientFactory.build(), retryManager, episodeNameParser);
-        env.manage(calendarFeedManager);
+        final FeedManager<CalendarItem> calendarFeedManager = MediaManager.buildCalendarFeedManager(config.getCalendarConfiguration(), shows, backfillManager, clientFactory.build("calendar-feed"), retryManager, episodeNameParser);
+        environment.lifecycle().manage(calendarFeedManager);
 
         // Initialise the torrent feed manager - this periodically parses the known torrent RSS feeds to look for new episodes we are watching for
-        final FeedManager<RSSItem> torrentFeedManager = MediaManager.buildTorrentFeedManager(config.getTorrentConfiguration(), downloadableListener, clientFactory.build(), retryManager);
-        env.manage(torrentFeedManager);
+        final FeedManager<RSSItem> torrentFeedManager = MediaManager.buildTorrentFeedManager(config.getTorrentConfiguration(), downloadableListener, clientFactory.build("torrent-feed"), retryManager);
+        environment.lifecycle().manage(torrentFeedManager);
 
         // Initialise the download dir manager - this listens for new files in the download directory and moves the wanted ones to a specified directory
 		final DownloadDirManager downloadDirManager = MediaManager.buildDownloadDirManager(config.getFileConfiguration(), mediaListener, files);
-        env.manage(downloadDirManager);
+        environment.lifecycle().manage(downloadDirManager);
 
         // Add a filter to redirect favicon to the static assets directory
-        env.addFilter(new StaticAssetForwarder(), "/favicon.*");
+        environment.servlets().addFilter("favicon-filter", new StaticAssetForwarder())
+                .addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/favicon.*");
 
         // Add API endpoints
-        env.addResource(new MediaManagerResource());
-        env.addResource(new ShowsResource(shows));
-        env.addResource(new BackfillResource(shows, backfillManager, episodeNameParser));
+        environment.jersey().register(new MediaManagerResource());
+        environment.jersey().register(new ShowsResource(shows));
+        environment.jersey().register(new BackfillResource(shows, backfillManager, episodeNameParser));
 
-        // Add ping healthchecks for torrents, calendar, and backfill
-        env.addHealthCheck(new ParserHealthcheck(config.getHttpClientConfiguration().getConnectionTimeout(), torrentFeedManager, calendarFeedManager, backfillManager));
-        env.addHealthCheck(new DatabaseHealthcheck(shows));
+        // Add ping health checks for torrents, calendar, and backfill
+        environment.healthChecks().register("parsers", new ParserHealthcheck(config.getHttpClientConfiguration().getConnectionTimeout(), torrentFeedManager, calendarFeedManager, backfillManager));
+        environment.healthChecks().register("database", new DatabaseHealthcheck(shows));
     }
 }

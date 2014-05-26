@@ -1,7 +1,7 @@
 package com.jamierf.mediamanager.views;
 
 import com.jamierf.mediamanager.models.Episode;
-import com.yammer.dropwizard.views.View;
+import io.dropwizard.views.View;
 
 import java.util.Collection;
 

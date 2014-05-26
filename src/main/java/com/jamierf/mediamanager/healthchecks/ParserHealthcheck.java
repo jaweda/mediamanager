@@ -1,10 +1,10 @@
 package com.jamierf.mediamanager.healthchecks;
 
+import com.codahale.metrics.health.HealthCheck;
 import com.google.common.collect.Sets;
 import com.jamierf.mediamanager.io.HttpParser;
 import com.jamierf.mediamanager.managers.ParsingManager;
-import com.yammer.dropwizard.util.Duration;
-import com.yammer.metrics.core.HealthCheck;
+import io.dropwizard.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,6 @@ public class ParserHealthcheck extends HealthCheck {
     private final ParsingManager[] managers;
 
     public ParserHealthcheck(Duration timeout, ParsingManager ... managers) {
-        super("parsers");
         this.timeout = timeout;
 
         this.managers = managers;

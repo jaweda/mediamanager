@@ -1,6 +1,6 @@
 package com.jamierf.mediamanager.views;
 
-import com.yammer.dropwizard.views.View;
+import io.dropwizard.views.View;
 
 public class BackfillForm extends View {
 

@@ -8,7 +8,7 @@ import com.jamierf.mediamanager.models.NameAndQuality;
 import com.jamierf.mediamanager.models.State;
 import com.jamierf.mediamanager.parsing.EpisodeNameParser;
 import com.jamierf.mediamanager.views.BackfillForm;
-import com.yammer.dropwizard.views.View;
+import io.dropwizard.views.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

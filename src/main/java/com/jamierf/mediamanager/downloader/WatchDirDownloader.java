@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
 public class WatchDirDownloader implements Downloader {
@@ -17,7 +18,7 @@ public class WatchDirDownloader implements Downloader {
 
     private static String getFilename(URI link) {
         final String value = link.toString();
-        final String hash = Hashing.sha1().hashString(value).toString();
+        final String hash = Hashing.sha1().hashString(value, StandardCharsets.UTF_8).toString();
 
         return String.format("%s.torrent", hash);
     }

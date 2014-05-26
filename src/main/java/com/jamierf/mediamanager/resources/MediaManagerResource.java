@@ -1,7 +1,7 @@
 package com.jamierf.mediamanager.resources;
 
 import com.jamierf.mediamanager.views.HomeView;
-import com.yammer.dropwizard.views.View;
+import io.dropwizard.views.View;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

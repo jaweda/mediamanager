@@ -19,7 +19,7 @@ public class AzureTableShowDatabase implements ShowDatabase {
     private final Map<Name, Episode> episodes;
 
     public AzureTableShowDatabase(String accountName, String accountKey) throws StorageException {
-        episodes = new AzureMap<Name, Episode>(accountName, accountKey, TABLE_NAME, Name.class, Episode.class);
+        episodes = new AzureMap<>(accountName, accountKey, TABLE_NAME, Name.class, Episode.class);
     }
 
     @Override

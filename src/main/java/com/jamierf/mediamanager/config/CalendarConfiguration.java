@@ -1,7 +1,7 @@
 package com.jamierf.mediamanager.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.yammer.dropwizard.util.Duration;
+import io.dropwizard.util.Duration;
 
 import java.util.Collections;
 import java.util.Map;

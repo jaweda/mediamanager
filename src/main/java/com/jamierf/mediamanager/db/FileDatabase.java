@@ -1,6 +1,6 @@
 package com.jamierf.mediamanager.db;
 
-import com.yammer.dropwizard.lifecycle.Managed;
+import io.dropwizard.lifecycle.Managed;
 
 import java.io.IOException;
 

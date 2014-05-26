@@ -13,7 +13,7 @@ public class AzureTableFileDatabase implements FileDatabase {
     private final Set<String> files;
 
     public AzureTableFileDatabase(String accountName, String accountKey) throws StorageException {
-        files = new AzureSet<String>(accountName, accountKey, TABLE_NAME, String.class);
+        files = new AzureSet<>(accountName, accountKey, TABLE_NAME, String.class);
     }
 
     @Override

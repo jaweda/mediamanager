@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
-import com.yammer.dropwizard.util.Duration;
+import io.dropwizard.util.Duration;
 import org.apache.http.conn.ConnectTimeoutException;
 
 import java.net.SocketTimeoutException;

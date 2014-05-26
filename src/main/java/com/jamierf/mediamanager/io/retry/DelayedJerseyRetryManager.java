@@ -1,7 +1,7 @@
 package com.jamierf.mediamanager.io.retry;
 
 import com.jamierf.mediamanager.config.RetryConfiguration;
-import com.yammer.dropwizard.util.Duration;
+import io.dropwizard.util.Duration;
 
 import java.security.SecureRandom;
 import java.util.Set;

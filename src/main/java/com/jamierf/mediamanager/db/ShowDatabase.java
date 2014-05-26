@@ -3,7 +3,7 @@ package com.jamierf.mediamanager.db;
 import com.google.common.base.Optional;
 import com.jamierf.mediamanager.models.Episode;
 import com.jamierf.mediamanager.models.Name;
-import com.yammer.dropwizard.lifecycle.Managed;
+import io.dropwizard.lifecycle.Managed;
 
 import java.io.IOException;
 import java.util.Collection;

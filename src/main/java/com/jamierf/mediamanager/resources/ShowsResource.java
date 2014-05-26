@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.models.Episode;
 import com.jamierf.mediamanager.views.ShowsView;
-import com.yammer.dropwizard.views.View;
+import io.dropwizard.views.View;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

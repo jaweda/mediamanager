@@ -1,8 +1,8 @@
 package com.jamierf.mediamanager.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.yammer.dropwizard.client.JerseyClientConfiguration;
-import com.yammer.dropwizard.config.Configuration;
+import io.dropwizard.Configuration;
+import io.dropwizard.client.JerseyClientConfiguration;
 
 import java.util.Collections;
 import java.util.Map;

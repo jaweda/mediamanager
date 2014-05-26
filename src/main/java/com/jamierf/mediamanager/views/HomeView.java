@@ -1,8 +1,7 @@
 package com.jamierf.mediamanager.views;
 
 import com.google.common.collect.ImmutableSet;
-import com.jamierf.mediamanager.resources.MediaManagerResource;
-import com.yammer.dropwizard.views.View;
+import io.dropwizard.views.View;
 
 import java.util.Collection;
 

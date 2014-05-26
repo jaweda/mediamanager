@@ -6,7 +6,7 @@ import com.jamierf.mediamanager.handler.FileHandler;
 import com.jamierf.mediamanager.handler.FileTypeHandler;
 import com.jamierf.mediamanager.io.DirMonitor;
 import com.jamierf.mediamanager.io.FileListener;
-import com.yammer.dropwizard.lifecycle.Managed;
+import io.dropwizard.lifecycle.Managed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

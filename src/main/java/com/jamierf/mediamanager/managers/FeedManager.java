@@ -1,6 +1,6 @@
 package com.jamierf.mediamanager.managers;
 
-import com.fasterxml.jackson.jaxrs.json.util.LRUMap;
+import com.fasterxml.jackson.jaxrs.util.LRUMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -9,8 +9,8 @@ import com.jamierf.mediamanager.parsing.FeedParser;
 import com.jamierf.mediamanager.parsing.ItemListener;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.UniformInterfaceException;
-import com.yammer.dropwizard.lifecycle.Managed;
-import com.yammer.dropwizard.util.Duration;
+import io.dropwizard.lifecycle.Managed;
+import io.dropwizard.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public class FeedManager<T extends FeedItem> implements Managed, Runnable, Parsi
         // Store a cache of already seen items with LRU eviction
         oldItems = Sets.newSetFromMap(new LRUMap<T, Boolean>(16, CACHE_SIZE));
 
-        future = new AtomicReference();
+        future = new AtomicReference<>();
     }
 
     @Override

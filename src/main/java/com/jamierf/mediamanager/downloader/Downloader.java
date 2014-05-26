@@ -1,6 +1,6 @@
 package com.jamierf.mediamanager.downloader;
 
-import com.yammer.dropwizard.lifecycle.Managed;
+import io.dropwizard.lifecycle.Managed;
 
 import java.io.IOException;
 import java.net.URI;
