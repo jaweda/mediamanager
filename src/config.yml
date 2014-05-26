@@ -1,0 +1,66 @@
+httpClient:
+  timeout: 30s
+  connectionTimeout: 30s
+
+database:
+  accountName: "{{{dw.azureAccountName}}}"
+  accountKey: "{{{dw.azureAccountKey}}}"
+
+torrents:
+  watchDir: "{{{dw.pathTorrentWatchDirectory}}}" # Directory to put .torrents files in for them to be downloaded
+  qualities: [ "1080p" ]
+  updateDelay: 15m
+  backfillDelay: 12h
+  feeders:
+    hdbits:
+      passKey: {{{dw.hdbitsPasskey}}}
+  searchers:
+    hdbits:
+      uid: {{{dw.hdbitsUser}}}
+      pass: {{{dw.hdbitsPass}}}
+      hash: {{{dw.hdbitsHash}}}
+      passKey: {{{dw.hdbitsPasskey}}}
+
+calendars:
+  parsers:
+    pogdesigns:
+      passKey: {{{dw.pogdesignsPasskey}}}
+
+files:
+  watchDir: "{{{dw.pathTorrentFinishedDirectory}}}" # Directory to watch for finished downloads
+  tempDir: "{{{dw.pathTempDir}}}" # Temporary directory for extracting files
+  destinationDir: "{{{dw.pathEpisodeDestinationDirectory}}}" # Directory for moving finished episodes to
+  deleteOriginals: true
+
+aliases:
+  "parenthood": "parenthood 2010"
+  "revolution 2012": "revolution"
+  "bb theory": "the big bang theory"
+  "psych but not funny": "the mentalist"
+  "horse": "house"
+  "nashville 2012": "nashville"
+
+server:
+  applicationConnectors:
+    - type: http
+      port: {{{dw.httpPort}}}
+  adminConnectors:
+    - type: http
+      port: {{{dw.httpAdminPort}}}
+
+  requestLog:
+    appenders:
+      - type: file
+        currentLogFilename: "{{{path.logDirectory}}}/request.log"
+        archivedLogFilenamePattern: "{{{path.logDirectory}}}/request-%d.log.gz"
+
+logging:
+  level: WARN
+
+  appenders:
+    - type: file
+      currentLogFilename: "{{{path.logDirectory}}}/mediamanager.log"
+      archivedLogFilenamePattern: "{{{path.logDirectory}}}/mediamanager-%d.log.gz"
+
+  loggers:
+    "com.jamierf.mediamanager": TRACE

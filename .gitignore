@@ -1,13 +1,8 @@
 .project
 .settings/
 .classpath
-/target/
-/*/target
-/.idea/
+target/
+.idea/
 *.iml
 *.log
 *~
-config.ini
-cache/
-config.yml
-*.db
