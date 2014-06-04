@@ -97,7 +97,7 @@
             <plugin>
                 <groupId>com.jamierf.dropwizard</groupId>
                 <artifactId>dropwizard-debpkg-maven-plugin</artifactId>
-                <version>0.1-SNAPSHOT</version>
+                <version>0.3-SNAPSHOT</version>
                 <configuration>
                     <configTemplate>${basedir}/src/config.yml</configTemplate>
                     <jvm>
@@ -113,7 +113,7 @@
                         <pathTempDir>/tmp/</pathTempDir>
 
                         <hdbitsPasskey>passkey</hdbitsPasskey>
-                        <hdbitsUser>89324</hdbitsUser>
+                        <hdbitsUser>user</hdbitsUser>
                         <hdbitsPass>pass</hdbitsPass>
                         <hdbitsHash>hash</hdbitsHash>
 
