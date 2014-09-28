@@ -63,6 +63,8 @@ logging:
       archive: true
       archivedLogFilenamePattern: "{{{path.logDirectory}}}/mediamanager-%d.log.gz"
       archivedFileCount: 365
+    - type: loggly
+      token: "{{{dw.logglyToken}}}"
 
   loggers:
     "com.jamierf.mediamanager": TRACE

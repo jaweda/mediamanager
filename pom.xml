@@ -12,6 +12,7 @@
         <dropwizard.version>0.7.1</dropwizard.version>
         <dropwizard-debpkg.version>0.7-SNAPSHOT</dropwizard-debpkg.version>
 
+        <dropwizard-loggly.version>0.1-SNAPSHOT</dropwizard-loggly.version>
         <junrar.version>0.7</junrar.version>
         <dom4j.version>1.6.1</dom4j.version>
         <jaxen.version>1.1.1</jaxen.version>
@@ -131,6 +132,8 @@
                         <hdbitsHash>hash</hdbitsHash>
 
                         <pogdesignsPasskey>passkey</pogdesignsPasskey>
+
+                        <logglyToken>token</logglyToken>
 
                         <httpPort>7080</httpPort>
                         <httpAdminPort>7081</httpAdminPort>
@@ -288,6 +291,25 @@
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>${jsoup.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jamierf.dropwizard</groupId>
+            <artifactId>dropwizard-logging-loggly</artifactId>
+            <version>${dropwizard-loggly.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.dropwizard</groupId>
+                    <artifactId>dropwizard-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.dropwizard</groupId>
+                    <artifactId>dropwizard-logging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
