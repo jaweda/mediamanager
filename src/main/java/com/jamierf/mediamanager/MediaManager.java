@@ -1,5 +1,6 @@
 package com.jamierf.mediamanager;
 
+import com.codahale.metrics.MetricRegistry;
 import com.jamierf.mediamanager.config.*;
 import com.jamierf.mediamanager.db.FileDatabase;
 import com.jamierf.mediamanager.db.ShowDatabase;
@@ -58,12 +59,12 @@ public class MediaManager extends Application<MediaManagerConfiguration> {
         new MediaManager().run(args);
 	}
 
-    private static ShowDatabase buildShowDatabase(DatabaseConfiguration config) throws StorageException {
-        return new AzureTableShowDatabase(config.getString("accountName"), config.getString("accountKey"));
+    private static ShowDatabase buildShowDatabase(final DatabaseConfiguration config, final MetricRegistry metrics) throws StorageException {
+        return new AzureTableShowDatabase(config.getString("accountName"), config.getString("accountKey"), metrics);
     }
 
-    private static FileDatabase buildFileDatabase(DatabaseConfiguration config) throws StorageException {
-        return new AzureTableFileDatabase(config.getString("accountName"), config.getString("accountKey"));
+    private static FileDatabase buildFileDatabase(final DatabaseConfiguration config, final MetricRegistry metrics) throws StorageException {
+        return new AzureTableFileDatabase(config.getString("accountName"), config.getString("accountKey"), metrics);
     }
 
     private static DownloadableItemListener buildDownloadableListener(TorrentConfiguration config, ShowDatabase shows, Downloader downloader, EpisodeNameParser episodeNameParser) {
@@ -165,14 +166,14 @@ public class MediaManager extends Application<MediaManagerConfiguration> {
     @Override
     public void run(MediaManagerConfiguration config, Environment environment) throws Exception {
         final JerseyClientBuilder clientFactory = new JerseyClientBuilder(environment).using(config.getHttpClientConfiguration());
-        final RetryManager retryManager = new DelayedJerseyRetryManager(MediaManager.class, config.getRetryConfiguration());
+        final RetryManager retryManager = new DelayedJerseyRetryManager(environment.metrics(), MediaManager.class, config.getRetryConfiguration());
 
         // Initialise the shows database - this stores what episodes we should be watching for
-        final ShowDatabase shows = MediaManager.buildShowDatabase(config.getDatabaseConfiguration());
+        final ShowDatabase shows = MediaManager.buildShowDatabase(config.getDatabaseConfiguration(), environment.metrics());
         environment.lifecycle().manage(shows);
 
         // Initialise the shows database - this stores what files have already been handled
-        final FileDatabase files = MediaManager.buildFileDatabase(config.getDatabaseConfiguration());
+        final FileDatabase files = MediaManager.buildFileDatabase(config.getDatabaseConfiguration(), environment.metrics());
         environment.lifecycle().manage(files);
 
         // Initialise the torrent file manager - this is responsible for taking a torrent file URL and downloading the torrent contents

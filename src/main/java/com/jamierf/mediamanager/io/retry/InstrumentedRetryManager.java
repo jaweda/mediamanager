@@ -1,27 +1,25 @@
 package com.jamierf.mediamanager.io.retry;
 
-import com.yammer.metrics.Metrics;
-import com.yammer.metrics.core.Meter;
-import com.yammer.metrics.core.Timer;
-import com.yammer.metrics.core.TimerContext;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-abstract public class InstrumentedRetryManager extends RetryManager {
+public abstract class InstrumentedRetryManager extends RetryManager {
     protected final Timer callTimer;
     protected final Meter retryMeter;
 
-    public InstrumentedRetryManager(Class<?> klass) {
-        callTimer = Metrics.newTimer(klass, "-calls");
-        retryMeter = Metrics.newMeter(klass, "-retries", "attempts", TimeUnit.SECONDS);
+    public InstrumentedRetryManager(final MetricRegistry metrics, final Class<?> klass) {
+        callTimer = metrics.timer(MetricRegistry.name(klass, "-calls"));
+        retryMeter = metrics.meter(MetricRegistry.name(klass, "-retries", "attempts"));
     }
 
     @Override
     public <T> T apply(final Callable<T> callable) {
         final AtomicBoolean isRetry = new AtomicBoolean(false);
-        TimerContext context = callTimer.time();
+        final Timer.Context context = callTimer.time();
         try {
             return super.apply(new Callable<T>() {
                 @Override

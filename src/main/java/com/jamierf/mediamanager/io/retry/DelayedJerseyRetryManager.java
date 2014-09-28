@@ -1,5 +1,6 @@
 package com.jamierf.mediamanager.io.retry;
 
+import com.codahale.metrics.MetricRegistry;
 import com.jamierf.mediamanager.config.RetryConfiguration;
 import io.dropwizard.util.Duration;
 
@@ -11,16 +12,16 @@ public class DelayedJerseyRetryManager extends JerseyRetryManager {
     protected final boolean exponential;
     protected final SecureRandom randomize;
 
-    public DelayedJerseyRetryManager(final Class<?> klass, RetryConfiguration config) {
-        this (klass, config.getMaxRetries(),
+    public DelayedJerseyRetryManager(final MetricRegistry metrics, final Class<?> klass, final RetryConfiguration config) {
+        this (metrics, klass, config.getMaxRetries(),
                 config.getMaxDuration(), config.getRetriableStatusCodes(),
                 config.getWait(), config.isExponentialBackoff(), config.isRandomiseWait());
     }
 
-    public DelayedJerseyRetryManager(final Class<?> klass, final int maxRetries,
+    public DelayedJerseyRetryManager(final MetricRegistry metrics, final Class<?> klass, final int maxRetries,
                                      final Duration maxDuration, final Set<Integer> retriableStatusCodes,
                                      final Duration wait, final boolean exponential, final boolean randomize) {
-        super(klass, maxRetries, maxDuration, retriableStatusCodes);
+        super (metrics, klass, maxRetries, maxDuration, retriableStatusCodes);
 
         this.wait = wait;
         this.exponential = exponential;

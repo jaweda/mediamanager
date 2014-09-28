@@ -1,5 +1,6 @@
 package com.jamierf.mediamanager.io.retry;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableSet;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
@@ -23,9 +24,9 @@ public class JerseyRetryManager extends InstrumentedRetryManager {
     protected final Set<Integer> retriableStatusCodes;
     protected final long expirationMS;
 
-    public JerseyRetryManager(final Class<?> klass, final int maxRetries, final Duration maxDuration,
+    public JerseyRetryManager(final MetricRegistry metrics, final Class<?> klass, final int maxRetries, final Duration maxDuration,
                               final Set<Integer> retriableStatusCodes) {
-        super(klass);
+        super (metrics, klass);
         this.maxRetries = maxRetries;
         this.expirationMS = ((maxDuration == null)
                 ? DEFAULT_MAX_DURATION

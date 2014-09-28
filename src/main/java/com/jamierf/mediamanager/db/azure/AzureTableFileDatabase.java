@@ -1,5 +1,6 @@
 package com.jamierf.mediamanager.db.azure;
 
+import com.codahale.metrics.MetricRegistry;
 import com.jamierf.mediamanager.db.FileDatabase;
 import com.microsoft.windowsazure.services.core.storage.StorageException;
 
@@ -12,8 +13,8 @@ public class AzureTableFileDatabase implements FileDatabase {
 
     private final Set<String> files;
 
-    public AzureTableFileDatabase(String accountName, String accountKey) throws StorageException {
-        files = new AzureSet<>(accountName, accountKey, TABLE_NAME, String.class);
+    public AzureTableFileDatabase(final String accountName, final String accountKey, final MetricRegistry metrics) throws StorageException {
+        files = new AzureSet<>(accountName, accountKey, TABLE_NAME, String.class, metrics);
     }
 
     @Override

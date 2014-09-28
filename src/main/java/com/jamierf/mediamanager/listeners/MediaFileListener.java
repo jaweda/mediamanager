@@ -1,6 +1,9 @@
 package com.jamierf.mediamanager.listeners;
 
 import com.google.common.base.Optional;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.models.Episode;
@@ -18,6 +21,7 @@ import java.io.IOException;
 public class MediaFileListener implements ItemListener<File> {
 
     private static final Logger LOG = LoggerFactory.getLogger(MediaFileListener.class);
+    private static final HashFunction HASH_FUNCTION = Hashing.md5();
 
     private static String getEpisodePath(Name name, String originalPath) {
         final StringBuilder builder = new StringBuilder();
@@ -103,10 +107,17 @@ public class MediaFileListener implements ItemListener<File> {
                 final File directory = destFile.getParentFile();
                 directory.mkdirs();
 
+                final HashCode hash = Files.hash(item, HASH_FUNCTION);
+
                 if (LOG.isDebugEnabled())
-                    LOG.debug("Renaming {} to {}", item.getAbsolutePath(), destFile.getAbsolutePath());
+                    LOG.debug("Renaming {} ({}={}) to {}", item.getAbsolutePath(), HASH_FUNCTION, hash, destFile.getAbsolutePath());
 
                 Files.move(item, destFile);
+
+                final HashCode destHash = Files.hash(destFile, HASH_FUNCTION);
+                if (!destHash.equals(hash)) {
+                    LOG.warn("Mismatching hash after renaming {} ({}={}) to {} ({}={})", item, HASH_FUNCTION, hash, destFile, HASH_FUNCTION, destHash);
+                }
             }
             catch (IOException e) {
                 LOG.error("Error moving temp file to " + destFile, e);

@@ -1,5 +1,6 @@
 package com.jamierf.mediamanager.db.azure;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -18,8 +19,8 @@ public class AzureTableShowDatabase implements ShowDatabase {
 
     private final Map<Name, Episode> episodes;
 
-    public AzureTableShowDatabase(String accountName, String accountKey) throws StorageException {
-        episodes = new AzureMap<>(accountName, accountKey, TABLE_NAME, Name.class, Episode.class);
+    public AzureTableShowDatabase(final String accountName, final String accountKey, final MetricRegistry metrics) throws StorageException {
+        episodes = new AzureMap<>(accountName, accountKey, TABLE_NAME, Name.class, Episode.class, metrics);
     }
 
     @Override

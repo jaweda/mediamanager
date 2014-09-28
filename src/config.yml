@@ -8,7 +8,7 @@ database:
 
 torrents:
   watchDir: "{{{dw.pathTorrentWatchDirectory}}}" # Directory to put .torrents files in for them to be downloaded
-  qualities: [ "1080p" ]
+  qualities: [ "1080p", "720p" ]
   updateDelay: 15m
   backfillDelay: 12h
   feeders:
@@ -52,7 +52,7 @@ server:
     appenders:
       - type: file
         currentLogFilename: "{{{path.logDirectory}}}/request.log"
-        archivedLogFilenamePattern: "{{{path.logDirectory}}}/request-%d.log.gz"
+        archive: false
 
 logging:
   level: WARN
@@ -60,7 +60,9 @@ logging:
   appenders:
     - type: file
       currentLogFilename: "{{{path.logDirectory}}}/mediamanager.log"
+      archive: true
       archivedLogFilenamePattern: "{{{path.logDirectory}}}/mediamanager-%d.log.gz"
+      archivedFileCount: 365
 
   loggers:
     "com.jamierf.mediamanager": TRACE

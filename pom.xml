@@ -6,7 +6,11 @@
 	<url>https://github.com/reines/mediamanager</url>
 
     <properties>
-        <dropwizard.version>0.7.0</dropwizard.version>
+        <jdk.version>1.8</jdk.version>
+        <file.encoding>UTF-8</file.encoding>
+
+        <dropwizard.version>0.7.1</dropwizard.version>
+        <dropwizard-debpkg.version>0.7-SNAPSHOT</dropwizard-debpkg.version>
 
         <junrar.version>0.7</junrar.version>
         <dom4j.version>1.6.1</dom4j.version>
@@ -14,10 +18,9 @@
         <jsoup.version>1.7.1</jsoup.version>
         <ical4j.version>1.0.4</ical4j.version>
         <reflections.version>0.9.8</reflections.version>
-        <azure-table.version>2.0.1</azure-table.version>
+        <azure-table.version>3.0.0</azure-table.version>
         <commons.io.version>2.1</commons.io.version>
         <commons.lang.version>2.6</commons.lang.version>
-
         <junit.version>4.11</junit.version>
     </properties>
 
@@ -37,11 +40,21 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
+                    <encoding>${file.encoding}</encoding>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <encoding>${file.encoding}</encoding>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -97,7 +110,7 @@
             <plugin>
                 <groupId>com.jamierf.dropwizard</groupId>
                 <artifactId>dropwizard-debpkg-maven-plugin</artifactId>
-                <version>0.3-SNAPSHOT</version>
+                <version>${dropwizard-debpkg.version}</version>
                 <configuration>
                     <configTemplate>${basedir}/src/config.yml</configTemplate>
                     <jvm>
@@ -122,6 +135,9 @@
                         <httpPort>7080</httpPort>
                         <httpAdminPort>7081</httpAdminPort>
                     </dropwizard>
+                    <unix>
+                        <user>xbmc</user>
+                    </unix>
                 </configuration>
                 <executions>
                     <execution>
@@ -173,6 +189,10 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

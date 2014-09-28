@@ -1,5 +1,6 @@
 package com.jamierf.mediamanager.db.azure;
 
+import com.codahale.metrics.MetricRegistry;
 import com.microsoft.windowsazure.services.core.storage.StorageException;
 
 import java.util.Collection;
@@ -13,8 +14,8 @@ public class AzureSet<K> implements Set<K> {
 
     private final Map<K, Boolean> map;
 
-    public AzureSet(String accountName, String accountKey, String tableName, Class<K> keyClass) throws StorageException {
-        map = new AzureMap<K, Boolean>(accountName, accountKey, tableName, keyClass, Boolean.class);
+    public AzureSet(final String accountName, final String accountKey, final String tableName, final Class<K> keyClass, final MetricRegistry metrics) throws StorageException {
+        map = new AzureMap<K, Boolean>(accountName, accountKey, tableName, keyClass, Boolean.class, metrics);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.jamierf.mediamanager.db.azure;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Table;
 import com.microsoft.windowsazure.services.core.storage.StorageException;
 import com.yammer.collections.azure.util.AzureTables;
@@ -14,11 +15,11 @@ public class AzureMap<K, V> implements Map<K, V> {
 
     private final Table<Boolean, K, V> table;
 
-    public AzureMap(String accountName, String accountKey, String tableName, Class<K> keyClass, Class<V> valueClass) throws StorageException {
+    public AzureMap(final String accountName, final String accountKey, final String tableName, final Class<K> keyClass, final Class<V> valueClass, final MetricRegistry metrics) throws StorageException {
         table = AzureTables.clientForAccount(accountName, accountKey)
                 .tableWithName(tableName)
                 .createIfDoesNotExist()
-                .andAddMetrics()
+                .andAddMetrics(metrics)
                 .buildWithJsonSerialization(Boolean.class, keyClass, valueClass);
     }
 
