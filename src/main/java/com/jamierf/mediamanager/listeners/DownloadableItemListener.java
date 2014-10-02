@@ -3,6 +3,7 @@ package com.jamierf.mediamanager.listeners;
 import com.google.common.base.Optional;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.downloader.Downloader;
+import com.jamierf.mediamanager.filters.QualityFilter;
 import com.jamierf.mediamanager.models.Episode;
 import com.jamierf.mediamanager.models.Name;
 import com.jamierf.mediamanager.models.NameAndQuality;
@@ -14,19 +15,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Set;
 
 public class DownloadableItemListener implements ItemListener<DownloadableItem> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DownloadableItemListener.class);
 
-    private final Set<String> desiredQualities;
+    private final QualityFilter qualityFilter;
     private final ShowDatabase shows;
     private final Downloader torrentDownloader;
     private final EpisodeNameParser episodeNameParser;
 
-    public DownloadableItemListener(Set<String> desiredQualities, ShowDatabase shows, Downloader torrentDownloader, EpisodeNameParser episodeNameParser) {
-        this.desiredQualities = desiredQualities;
+    public DownloadableItemListener(QualityFilter qualityFilter, ShowDatabase shows, Downloader torrentDownloader, EpisodeNameParser episodeNameParser) {
+        this.qualityFilter = qualityFilter;
         this.shows = shows;
         this.torrentDownloader = torrentDownloader;
         this.episodeNameParser = episodeNameParser;
@@ -73,9 +73,9 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
         }
 
         // Check it is a desired quality
-        if (!desiredQualities.contains(nameAndQuality.getQuality())) {
+        if (!qualityFilter.apply(nameAndQuality)) {
             if (LOG.isTraceEnabled())
-                LOG.trace("Skipping torrent {}, desired quality {}", nameAndQuality, desiredQualities);
+                LOG.trace("Skipping torrent {}, not a desired quality", nameAndQuality);
 
             return;
         }

@@ -21,7 +21,6 @@ public class RarFileHandler implements FileTypeHandler {
 
 	private static final ImmutableSet<String> EXTENSIONS = ImmutableSet.of("rar");
     private static final Pattern PATH_NORMALISATION_REGEX = Pattern.compile("[\\\\/]");
-
 	private static final Logger LOG = LoggerFactory.getLogger(RarFileHandler.class);
 
     protected final File destDir;
@@ -42,8 +41,13 @@ public class RarFileHandler implements FileTypeHandler {
 		return EXTENSIONS;
     }
 
-    protected boolean acceptContainedFile(String path) throws IOException {
-        return !files.isHandled(path);
+    protected boolean acceptContainedFile(FileHeader file) throws IOException {
+        if (files.isHandled(file.getFileNameString())) {
+            LOG.trace("Rejecting already handled file: {}", file);
+            return false;
+        }
+
+        return true;
     }
 
     protected File getDestinationFile(String path) {
@@ -75,7 +79,7 @@ public class RarFileHandler implements FileTypeHandler {
 
 			final List<FileHeader> fileHeaders = archive.getFileHeaders();
 			for (FileHeader fileHeader : fileHeaders) {
-                if (!this.acceptContainedFile(fileHeader.getFileNameString()))
+                if (!this.acceptContainedFile(fileHeader))
                     continue;
 
                 final String path = PATH_NORMALISATION_REGEX.matcher(fileHeader.getFileNameString()).replaceAll(File.separator);

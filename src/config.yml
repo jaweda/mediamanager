@@ -8,7 +8,9 @@ database:
 
 torrents:
   watchDir: "{{{dw.pathTorrentWatchDirectory}}}" # Directory to put .torrents files in for them to be downloaded
-  qualities: [ "1080p", "720p" ]
+  primaryQualities: [ "1080p" ]
+  secondaryQualities: [ "720p" ]
+  primaryQualityTimeout: 2d
   updateDelay: 15m
   backfillDelay: 12h
   feeders:

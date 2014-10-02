@@ -3,11 +3,14 @@ package com.jamierf.mediamanager;
 import com.codahale.metrics.MetricRegistry;
 import com.jamierf.mediamanager.config.*;
 import com.jamierf.mediamanager.db.FileDatabase;
+import com.jamierf.mediamanager.db.QualityDatabase;
 import com.jamierf.mediamanager.db.ShowDatabase;
 import com.jamierf.mediamanager.db.azure.AzureTableFileDatabase;
+import com.jamierf.mediamanager.db.azure.AzureTableQualityDatabase;
 import com.jamierf.mediamanager.db.azure.AzureTableShowDatabase;
 import com.jamierf.mediamanager.downloader.Downloader;
 import com.jamierf.mediamanager.downloader.WatchDirDownloader;
+import com.jamierf.mediamanager.filters.QualityFilter;
 import com.jamierf.mediamanager.handler.GarbageFileHandler;
 import com.jamierf.mediamanager.handler.MediaFileHandler;
 import com.jamierf.mediamanager.handler.MediaRarFileHandler;
@@ -67,8 +70,16 @@ public class MediaManager extends Application<MediaManagerConfiguration> {
         return new AzureTableFileDatabase(config.getString("accountName"), config.getString("accountKey"), metrics);
     }
 
-    private static DownloadableItemListener buildDownloadableListener(TorrentConfiguration config, ShowDatabase shows, Downloader downloader, EpisodeNameParser episodeNameParser) {
-        return new DownloadableItemListener(config.getQualities(), shows, downloader, episodeNameParser);
+    private static QualityDatabase buildQualityDatabase(final DatabaseConfiguration config, final MetricRegistry metrics) throws StorageException {
+        return new AzureTableQualityDatabase(config.getString("accountName"), config.getString("accountKey"), metrics);
+    }
+
+    private static QualityFilter buildQualityFilter(TorrentConfiguration config, final QualityDatabase db) {
+        return new QualityFilter(db, config.getPrimaryQualities(), config.getSecondaryQualities(), config.getPrimaryQualityTimeout());
+    }
+
+    private static DownloadableItemListener buildDownloadableListener(QualityFilter qualityFilter, ShowDatabase shows, Downloader downloader, EpisodeNameParser episodeNameParser) {
+        return new DownloadableItemListener(qualityFilter, shows, downloader, episodeNameParser);
     }
 
     private static MediaFileListener buildMediaListener(ShowDatabase shows, FileConfiguration config, EpisodeNameParser episodeNameParser) {
@@ -176,6 +187,9 @@ public class MediaManager extends Application<MediaManagerConfiguration> {
         final FileDatabase files = MediaManager.buildFileDatabase(config.getDatabaseConfiguration(), environment.metrics());
         environment.lifecycle().manage(files);
 
+        final QualityDatabase quality = MediaManager.buildQualityDatabase(config.getDatabaseConfiguration(), environment.metrics());
+        environment.lifecycle().manage(quality);
+
         // Initialise the torrent file manager - this is responsible for taking a torrent file URL and downloading the torrent contents
         final Downloader torrentFileManager = MediaManager.buildTorrentFileManager(config.getTorrentConfiguration(), clientFactory.build("file"), retryManager);
         environment.lifecycle().manage(torrentFileManager);
@@ -183,8 +197,11 @@ public class MediaManager extends Application<MediaManagerConfiguration> {
         // Initialise the episode name parser - this parses filenames and torrent titles in to an episode name, number, season number, and quality
         final EpisodeNameParser episodeNameParser = new EpisodeNameParser(config.getAliases());
 
+        // Initialise filter for qualities
+        final QualityFilter qualityFilter = buildQualityFilter(config.getTorrentConfiguration(), quality);
+
         // Initialise the downloadable item listener - this listens for downloadable items and passes them to the torrent file manager
-        final DownloadableItemListener downloadableListener = MediaManager.buildDownloadableListener(config.getTorrentConfiguration(), shows, torrentFileManager, episodeNameParser);
+        final DownloadableItemListener downloadableListener = MediaManager.buildDownloadableListener(qualityFilter, shows, torrentFileManager, episodeNameParser);
 
         // Initialise the media item listener - this listens for downloaded items and marks them as such in the database
         final MediaFileListener mediaListener = MediaManager.buildMediaListener(shows, config.getFileConfiguration(), episodeNameParser);

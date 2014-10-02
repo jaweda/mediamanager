@@ -4,11 +4,15 @@ import com.github.junrar.Archive;
 import com.github.junrar.rarfile.FileHeader;
 import com.jamierf.mediamanager.db.FileDatabase;
 import com.jamierf.mediamanager.listeners.MediaFileListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 
 public class MediaRarFileHandler extends RarFileHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MediaRarFileHandler.class);
 
     private final MediaFileListener listener;
 
@@ -19,14 +23,25 @@ public class MediaRarFileHandler extends RarFileHandler {
     }
 
     @Override
-    protected boolean acceptContainedFile(String path) throws IOException {
+    protected boolean acceptContainedFile(FileHeader file) throws IOException {
         // Check our parent class will accept the file
-        if (!super.acceptContainedFile(path))
+        if (!super.acceptContainedFile(file)) {
             return false;
+        }
+
+        final String path = file.getFileNameString();
 
         // Check the Media file handler will accept the file
-        if (!MediaFileHandler.acceptFileExtension(path))
+        if (!MediaFileHandler.acceptFileExtension(path)) {
+            LOG.trace("Rejecting unacceptable file extension: {}", file);
             return false;
+        }
+
+        final long size = file.getFullUnpackSize();
+        if (!MediaFileHandler.acceptFileSize(size)) {
+            LOG.trace("Rejecting too small file: {} ({} bytes)", file, size);
+            return false;
+        }
 
         return true;
     }

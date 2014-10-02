@@ -17,3 +17,4 @@ public class MediaManagerResource {
         return new HomeView();
     }
 }
+

@@ -23,7 +23,13 @@ public class TorrentConfiguration {
     private Duration backfillDelay = Duration.days(7);
 
     @JsonProperty
-    private Set<String> qualities = EpisodeNameParser.EPISODE_QUALITIES;
+    private Set<String> primaryQualities = EpisodeNameParser.EPISODE_QUALITIES;
+
+    @JsonProperty
+    private Duration primaryQualityTimeout = Duration.days(1);
+
+    @JsonProperty
+    private Set<String> secondaryQualities = Collections.emptySet();
 
     @JsonProperty
     private Map<String, ParserConfiguration> feeders = Collections.emptyMap();
@@ -43,8 +49,16 @@ public class TorrentConfiguration {
         return backfillDelay;
     }
 
-    public Set<String> getQualities() {
-        return qualities;
+    public Set<String> getPrimaryQualities() {
+        return primaryQualities;
+    }
+
+    public Duration getPrimaryQualityTimeout() {
+        return primaryQualityTimeout;
+    }
+
+    public Set<String> getSecondaryQualities() {
+        return secondaryQualities;
     }
 
     public Map<String, ParserConfiguration> getFeeders() {

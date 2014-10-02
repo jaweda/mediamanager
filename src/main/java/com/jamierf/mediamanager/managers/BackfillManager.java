@@ -1,6 +1,5 @@
 package com.jamierf.mediamanager.managers;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.jamierf.mediamanager.db.ShowDatabase;
@@ -17,10 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -31,11 +27,7 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
     private static final Duration THROTTLE_DELAY = Duration.seconds(5);
     private static final Duration START_DELAY = Duration.minutes(1);
 
-    private static final Random random;
-
-    static {
-        random = new Random();
-    }
+    private static final Random RANDOM = new Random();
 
     private final ShowDatabase shows;
     private final Duration delay;
@@ -55,7 +47,7 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
         parsers = Lists.newLinkedList();
         listeners = Lists.newLinkedList();
 
-        future = new AtomicReference();
+        future = new AtomicReference<>();
     }
 
     @Override
@@ -106,7 +98,7 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
                     this.search(episode.getName());
 
                     // sleep for a delay around THROTTLE_DELAY, +/- 50%
-                    final long delay = throttleDelayMS - (throttleDelayMS / 2) + random.nextInt(throttleDelayMS);
+                    final long delay = throttleDelayMS - (throttleDelayMS / 2) + RANDOM.nextInt(throttleDelayMS);
                     Thread.sleep(delay);
                 }
                 catch (Exception e) {
@@ -161,18 +153,10 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
 
         // Alert every listener of each item and exception
         synchronized (listeners) {
-            for (final ItemListener<SearchItem> listener : listeners) {
-                workerPool.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (Throwable exception : exceptions)
-                            listener.onException(exception);
-
-                        for (SearchItem item : items)
-                            listener.onNewItem(item);
-                    }
-                });
-            }
+            listeners.forEach((listener) -> workerPool.execute(() -> {
+                exceptions.forEach(listener::onException);
+                items.forEach(listener::onNewItem);
+            }));
         }
     }
 
@@ -197,7 +181,7 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
 
     public Collection<SearchParser> getParsers() {
         synchronized (parsers) {
-            return ImmutableSet.copyOf(parsers);
+            return Collections.unmodifiableCollection(parsers);
         }
     }
 

@@ -8,6 +8,8 @@ import com.google.common.io.Files;
 import com.jamierf.mediamanager.db.FileDatabase;
 import com.jamierf.mediamanager.listeners.MediaFileListener;
 import com.jamierf.mediamanager.managers.DownloadDirManager;
+import io.dropwizard.util.Size;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,13 +23,18 @@ public class MediaFileHandler implements FileTypeHandler {
 	private static final ImmutableSet<String> EXTENSIONS = ImmutableSet.of("avi", "mkv", "mp4", "divx");
     private static final Pattern MEDIA_REJECT_PATTERN = Pattern.compile("\\bsample\\b", Pattern.CASE_INSENSITIVE);
     private static final HashFunction HASH_FUNCTION = Hashing.md5();
+    private static final Size MIN_FILE_SIZE = Size.megabytes(100);
+	private static final Logger LOG = LoggerFactory.getLogger(MediaFileHandler.class);
 
     public static boolean acceptFileExtension(String path) {
         final String extension = DownloadDirManager.getFileExtension(path);
         return EXTENSIONS.contains(extension) && !MEDIA_REJECT_PATTERN.matcher(path).find();
     }
 
-	private static final Logger LOG = LoggerFactory.getLogger(MediaFileHandler.class);
+    public static boolean acceptFileSize(long bytes) {
+        return bytes >= MIN_FILE_SIZE.toBytes();
+    }
+
 
     private final File destDir;
     private final boolean move;
@@ -49,17 +56,32 @@ public class MediaFileHandler implements FileTypeHandler {
 		return EXTENSIONS;
 	}
 
-    protected boolean acceptFile(String path) throws IOException {
-        if (!MediaFileHandler.acceptFileExtension(path))
-            return false;
+    protected boolean acceptFile(File file) throws IOException {
+        final String path = file.getName();
 
-        return !files.isHandled(path);
+        if (!MediaFileHandler.acceptFileExtension(path)) {
+            LOG.trace("Rejecting unacceptable file extension: {}", file);
+            return false;
+        }
+
+        if (files.isHandled(path)) {
+            LOG.trace("Rejecting already handled file: {}", file);
+            return false;
+        }
+
+        final long size = FileUtils.sizeOf(file);
+        if (!acceptFileSize(size)) {
+            LOG.trace("Rejecting too small file: {} ({} bytes)", file, size);
+            return false;
+        }
+
+        return true;
     }
 
 	@Override
 	public void handleFile(String relativePath, File file) throws IOException {
         // Only accept certain files
-        if (!this.acceptFile(file.getName())) {
+        if (!this.acceptFile(file)) {
             // If we were passed the file but didn't accept it then delete it
 
             if (LOG.isDebugEnabled())
