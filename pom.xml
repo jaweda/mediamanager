@@ -10,7 +10,7 @@
         <file.encoding>UTF-8</file.encoding>
 
         <dropwizard.version>0.7.1</dropwizard.version>
-        <dropwizard-debpkg.version>0.7-SNAPSHOT</dropwizard-debpkg.version>
+        <dropwizard-debpkg.version>0.7</dropwizard-debpkg.version>
 
         <dropwizard-loggly.version>0.4</dropwizard-loggly.version>
         <junrar.version>0.7</junrar.version>

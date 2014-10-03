@@ -29,9 +29,7 @@ public class CalendarItemListener implements ItemListener<CalendarItem> {
     public void onNewItem(CalendarItem item) {
         final Name name = episodeNameParser.parseCalendarSummary(item.getSummary());
         if (name == null) {
-            if (LOG.isTraceEnabled())
-                LOG.trace("Failed to parse episode title: " + item.getSummary());
-
+            LOG.trace("Failed to parse episode title: {}", item.getSummary());
             return;
         }
 
@@ -39,25 +37,21 @@ public class CalendarItemListener implements ItemListener<CalendarItem> {
             // Attempt to add the desired episode
             final Episode episode = new Episode(name, State.DESIRED);
             if (!shows.addIfNotExists(episode)) {
-                if (LOG.isTraceEnabled())
-                    LOG.trace("Failed to add episode {} to database (already exists?)", episode);
-
                 return;
             }
 
-            if (LOG.isInfoEnabled())
-                LOG.info("Added new desired episode {}", episode);
+            LOG.debug("Added new desired episode {}", episode);
 
             // Schedule backfill now that we know about a new episode
             backfillManager.schedule();
         }
         catch (Exception e) {
-            LOG.error("Failed to insert episode in to database", e);
+            LOG.warn("Failed to insert episode in to database", e);
         }
     }
 
     @Override
     public void onException(Throwable cause) {
-        LOG.error("Failed parsing calendar item", cause);
+        LOG.warn("Failed parsing calendar item", cause);
     }
 }
