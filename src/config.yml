@@ -57,7 +57,7 @@ server:
         archive: false
 
 logging:
-  level: WARN
+  level: INFO
 
   appenders:
     - type: file

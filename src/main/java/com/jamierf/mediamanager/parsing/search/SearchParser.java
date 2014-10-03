@@ -24,9 +24,7 @@ public abstract class SearchParser extends HttpParser<SearchItem> {
         final String content = this.fetchContent(resource);
 
         final Set<SearchItem> results = this.parse(content);
-
-        if (LOG.isDebugEnabled())
-            LOG.debug("Parsed {} search results", results.size());
+        LOG.debug("Parsed {} search results: {}", results.size(), results);
 
         return results;
     }

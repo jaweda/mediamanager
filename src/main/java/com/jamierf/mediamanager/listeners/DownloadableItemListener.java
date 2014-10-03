@@ -57,42 +57,32 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
     public synchronized void onNewItem(DownloadableItem item) {
         final NameAndQuality nameAndQuality = episodeNameParser.parseFilename(item.getTitle());
         if (nameAndQuality == null) {
-            if (LOG.isTraceEnabled())
-                LOG.trace("Failed to parse episode title: " + item.getTitle());
-
+            LOG.trace("Failed to parse episode title: " + item.getTitle());
             return;
         }
 
         // Check if it is a desired episode
         final Optional<Episode> episode = this.getEpisode(nameAndQuality.getName());
         if (!episode.isPresent() || !episode.get().isDesired()) {
-            if (LOG.isTraceEnabled())
-                LOG.trace("Skipping {}, not desired", nameAndQuality);
-
+            LOG.trace("Skipping {}, not desired", nameAndQuality);
             return;
         }
 
         // Check it is a desired quality
         if (!qualityFilter.apply(nameAndQuality)) {
-            if (LOG.isTraceEnabled())
-                LOG.trace("Skipping torrent {}, not a desired quality", nameAndQuality);
-
+            LOG.trace("Skipping torrent {}, not a desired quality", nameAndQuality);
             return;
         }
 
         // This is an episode we want!
-
-        if (LOG.isInfoEnabled())
-            LOG.info("Downloading torrent {}", nameAndQuality);
+        LOG.info("Downloading torrent {}", nameAndQuality);
 
         try {
             // Download the torrent file
             torrentDownloader.download(item.getLink());
         }
         catch (Exception e) {
-            LOG.error("Failed to download torrent", e);
-
-            // Return so we don't mark this as pending since we failed to download it
+            LOG.warn("Failed to download torrent", e);
             return;
         }
 
@@ -101,12 +91,12 @@ public class DownloadableItemListener implements ItemListener<DownloadableItem> 
             this.updateEpisode(episode.get());
         }
         catch (Exception e) {
-            LOG.error("Failed to update episode in database", e);
+            LOG.warn("Failed to update episode in database", e);
         }
     }
 
     @Override
     public void onException(Throwable cause) {
-        LOG.error("Failed parsing downloadable item", cause);
+        LOG.warn("Failed parsing downloadable item", cause);
     }
 }

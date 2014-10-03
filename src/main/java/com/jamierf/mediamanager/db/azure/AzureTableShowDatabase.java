@@ -69,12 +69,12 @@ public class AzureTableShowDatabase implements ShowDatabase {
     }
 
     @Override
-    public void start() throws Exception {
+    public void start() {
 
     }
 
     @Override
-    public void stop() throws Exception {
+    public void stop() {
 
     }
 }

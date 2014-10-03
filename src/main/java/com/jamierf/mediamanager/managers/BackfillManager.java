@@ -26,7 +26,6 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
 
     private static final Duration THROTTLE_DELAY = Duration.seconds(5);
     private static final Duration START_DELAY = Duration.minutes(1);
-
     private static final Random RANDOM = new Random();
 
     private final ShowDatabase shows;
@@ -56,9 +55,7 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
             throw new RuntimeException("Backfiller is already running");
 
         this.schedule();
-
-        if (LOG.isDebugEnabled())
-            LOG.debug("Started with a delay of {}", delay);
+        LOG.debug("Started with a delay of {}", delay);
     }
 
     public synchronized void schedule() {
@@ -67,30 +64,24 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
         if (future != null)
             future.cancel(false);
 
-        if (LOG.isTraceEnabled())
-            LOG.trace("Scheduled a new backfill in {}", START_DELAY);
+        LOG.trace("Scheduled a new backfill in {}", START_DELAY);
     }
 
     @Override
     public void run() {
         if (parsers.isEmpty()) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("Skipping backfill, we have no search parsers");
-
+            LOG.debug("Skipping backfill, we have no search parsers");
             return;
         }
 
         try {
             final Collection<Episode> episodes = shows.getDesiredEpisodes();
             if (episodes.isEmpty()) {
-                if (LOG.isDebugEnabled())
-                    LOG.debug("Skipping backfill, we have all desired episodes");
-
+                LOG.debug("Skipping backfill, we have all desired episodes");
                 return;
             }
 
-            if (LOG.isInfoEnabled())
-                LOG.info("Starting a backfill for {} episodes", episodes.size());
+            LOG.info("Starting a backfill for {} episodes", episodes.size());
 
             final int throttleDelayMS = (int) THROTTLE_DELAY.toMilliseconds();
             for (Episode episode : episodes) {
@@ -111,11 +102,9 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
         }
     }
 
-    public void search(Name name) {
+    public void search(final Name name) {
         final String query = name.toString();
-
-        if (LOG.isDebugEnabled())
-            LOG.debug("Running search parsers for: {}", query);
+        LOG.debug("Running search parsers for: {}", query);
 
         // List to hold all parsed results, from all parsers
         final Set<SearchItem> items = Sets.newHashSet();
@@ -130,22 +119,16 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
                     items.addAll(parsedItems);
                 }
                 catch (ClientHandlerException e) {
-                    if (LOG.isDebugEnabled())
-                        LOG.debug("Timeout connecting to {}", parser.getUrl());
-
+                    LOG.debug("Timeout connecting to {}", parser.getUrl());
                     exceptions.add(e);
                 }
                 catch (UniformInterfaceException e) {
                     final int status = e.getResponse().getStatus();
-                    if (LOG.isDebugEnabled())
-                        LOG.debug("HTTP error {} from {}", status, parser.getUrl());
-
+                    LOG.debug("HTTP error {} from {}", status, parser.getUrl());
                     exceptions.add(e);
                 }
                 catch (Exception e) {
-                    if (LOG.isDebugEnabled())
-                        LOG.debug("Caught exception while parsing search", e);
-
+                    LOG.debug("Caught exception while parsing search", e);
                     exceptions.add(e);
                 }
             }
@@ -153,20 +136,27 @@ public class BackfillManager implements Managed, Runnable, ParsingManager {
 
         // Alert every listener of each item and exception
         synchronized (listeners) {
-            listeners.forEach((listener) -> workerPool.execute(() -> {
-                exceptions.forEach(listener::onException);
-                items.forEach(listener::onNewItem);
-            }));
+            for (final ItemListener<SearchItem> listener : listeners) {
+                workerPool.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (Throwable exception : exceptions)
+                            listener.onException(exception);
+
+                        for (SearchItem item : items)
+                            listener.onNewItem(item);
+                    }
+                });
+            }
         }
     }
 
     @Override
-    public void stop() throws Exception {
+    public void stop() {
         if (future.get() == null)
             throw new RuntimeException("Backfiller is not running");
 
-        if (LOG.isDebugEnabled())
-            LOG.debug("Shutting down");
+        LOG.debug("Shutting down");
 
         future.get().cancel(false);
         bossPool.shutdown();
