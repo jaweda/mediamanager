@@ -12,7 +12,7 @@ torrents:
   secondaryQualities: [ "720p" ]
   primaryQualityTimeout: 2d
   updateDelay: 15m
-  backfillDelay: 12h
+  backfillDelay: 3h
   feeders:
     hdbits:
       passKey: {{{dw.hdbitsPasskey}}}
